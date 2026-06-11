@@ -1,4 +1,4 @@
-# 📄 IP Weave — 链上衍生宇宙 · 项目提案
+#  IP Weave — 链上衍生宇宙 · 项目提案
 
 > Casual Hackathon · Z.AI 赛道
 
