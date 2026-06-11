@@ -43,10 +43,14 @@ class ReActAgent:
         self.thinking_log = []
         self.max_steps = 15
 
-    def run(self, ip_name: str = "pepe"):
+    def run(self, ip_name: str = "pepe", contract: str = ""):
         """启动 Agent 自主循环"""
-        self._log("🧠", f"IP Weave Agent 启动，目标 IP: {ip_name}")
-        self._log("📋", f"任务: 基于 {ip_name} 链上 IP，自主生成衍生故事、动画脚本、周边资产")
+        if contract:
+            ip_name = contract
+        self.contract_address = contract
+        self.target_ip = ip_name
+        self._log("🧠", f"IP Weave Agent 启动，目标: {ip_name}")
+        self._log("📋", f"任务: 基于链上 IP，自主生成衍生故事、动画脚本、周边资产")
 
         step_count = 0
         done = False
@@ -112,7 +116,8 @@ class ReActAgent:
         from src.content.generators import StoryGenerator, ScriptGenerator, AssetDesigner
 
         if action == "read_ip":
-            self.chain_data = self.reader.fetch(ip_name=ip_name)
+            target = self.contract_address if self.contract_address else ip_name
+            self.chain_data = self.reader.fetch(ip_name=target, contract=self.contract_address)
             self._log("📦", f"读取完成: {self.chain_data.get('name', '')}")
             return True
 
