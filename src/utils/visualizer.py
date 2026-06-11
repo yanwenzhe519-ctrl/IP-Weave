@@ -122,7 +122,7 @@ def save_visual_assets(output_dir, style_profile, assets_result):
     _make_index_html(vdir, ip_name, len(scenes), len(assets_result.get("assets", [])))
 
     count = 1 + len(scenes) + len(assets_result.get("assets", []))
-    logger.info(f"  🎨 已生成 {count} 个 SVG 矢量图形 → {vdir}")
+    logger.info(f"   已生成 {count} 个 SVG 矢量图形 → {vdir}")
     return vdir
 
 
@@ -154,9 +154,9 @@ h2 {{color:#fff;margin:32px 0 16px;font-size:1.1em;}}
 .footer {{text-align:center;padding:32px;color:#333;font-size:0.8em;}}
 </style></head>
 <body><div class="container">
-<h1>🎨 {ip_name} · 视觉资产</h1>
+<h1> {ip_name} · 视觉资产</h1>
 <p style="color:#666;margin-bottom:24px;">SVG 矢量图形 · 由代码直接生成</p>
-<h2>🧑 角色概念</h2>
+<h2> 角色概念</h2>
 <div style="display:flex;justify-content:center;"><div class="card char-card"><img src="character.svg" alt="Character"><div class="label">{ip_name}</div></div></div>
 <h2>SCRIPT 分镜场景</h2><div class="grid">{scene_cards}</div>
 <h2>ASSET 周边资产</h2><div class="grid">{asset_cards}</div>
