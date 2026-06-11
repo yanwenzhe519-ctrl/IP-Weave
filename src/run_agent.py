@@ -22,8 +22,8 @@ def main():
     target = input("链上 IP 名称或合约地址: ").strip()
 
     if not target:
-        print("使用默认 IP: pepe")
-        target = "pepe"
+        print("请输入一个链上 IP 名称或合约地址")
+        return
 
     if not settings.is_configured:
         print("请在 .env 中配置 ZHIPUAI_API_KEY")
