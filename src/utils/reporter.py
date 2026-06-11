@@ -68,12 +68,12 @@ h1 {{font-size:2.8em;font-weight:900;background:linear-gradient(135deg,#4ade80,#
 </head>
 <body>
 <div class="container">
-<div class="logo">🧬</div>
+<div class="logo"></div>
 <h1>IP Weave</h1>
 <div class="tagline">基于 GLM-5.1 的自治链上 IP 衍生内容 Agent</div>
 
 <div class="ip-section">
-<div class="ip-icon">🐸</div>
+<div class="ip-icon"></div>
 <div class="ip-name">{ip_name}</div>
 <div class="badge">由 GLM-5.1 自主创作 · Long-Horizon Task</div>
 </div>
@@ -97,7 +97,7 @@ h1 {{font-size:2.8em;font-weight:900;background:linear-gradient(135deg,#4ade80,#
 </div>
 
 <div style="text-align:left;background:#111;border:1px solid #222;border-radius:12px;padding:20px;margin-bottom:32px;font-size:0.85em;line-height:2;">
-<div style="color:#22d3ee;font-weight:700;margin-bottom:8px;">🤖 Agent 运行记录</div>
+<div style="color:#22d3ee;font-weight:700;margin-bottom:8px;"> Agent 运行记录</div>
 <div style="display:flex;justify-content:space-between;"><span style="color:#666;">驱动模型</span><span style="color:#22d3ee;">GLM-5.1</span></div>
 <div style="display:flex;justify-content:space-between;"><span style="color:#666;">执行步骤</span><span style="color:#22d3ee;">6 步完整闭环 (Perceive→Plan→Execute→Reflect→Iterate→Deliver)</span></div>
 <div style="display:flex;justify-content:space-between;"><span style="color:#666;">生成时间</span><span style="color:#22d3ee;">{datetime.now().strftime('%Y-%m-%d %H:%M')}</span></div>
@@ -188,7 +188,7 @@ def _make_asset_page(ip_name, assets):
         if asset.get("image_url"):
             img_block = f'<img src="{asset["image_url"]}" alt="{asset["name"]}" style="width:100%;border-radius:12px;margin-top:16px;">'
         else:
-            img_block = f'<div class="placeholder">🎨 CogView-3 出图需额外充值</div>'
+            img_block = f'<div class="placeholder"> CogView-3 出图需额外充值</div>'
         items_html += f"""
 <div class="asset-card">
 <h2>DECIDE {asset.get('name','未命名')}</h2>
