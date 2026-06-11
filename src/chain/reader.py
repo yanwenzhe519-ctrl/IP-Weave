@@ -28,9 +28,22 @@ class OnChainIPReader:
     def fetch(self, ip_name: str = "", contract: str = "", token_id: int = 1) -> dict:
         """从链上读取任意 IP 数据"""
         # 如果是名字，先查合约地址
-        if ip_name and ip_name.lower() in KNOWN_IPS:
-            contract = KNOWN_IPS[ip_name.lower()]
+        name_lower = ip_name.lower() if ip_name else ""
+        if name_lower in KNOWN_IPS:
+            contract = KNOWN_IPS[name_lower]
             logger.info(f"已知 IP: {ip_name} → {contract}")
+        elif ip_name and not contract:
+            # 未知名称，用 GLM-5.1 尝试解析
+            logger.info(f"尝试解析 IP 名称: {ip_name}")
+            try:
+                from src.utils.llm import glm
+                result = glm.chat_json([{"role": "user",
+                    "content": f"以下哪个是以太坊上 '{ip_name}' NFT 项目的合约地址？只返回 JSON: {{\"contract\":\"0x...\"}}。如果你不知道，返回 {{\"contract\":\"\"}}。仅返回 JSON，不要其他内容。"}])
+                if result and result.get("contract", "").startswith("0x"):
+                    contract = result["contract"]
+                    logger.info(f"解析到合约: {contract}")
+            except Exception:
+                pass
 
         if not contract:
             logger.warning("未提供合约地址，使用模拟数据")
