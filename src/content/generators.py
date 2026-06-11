@@ -81,7 +81,7 @@ IP 风格：
                 url = glm.generate_image(asset.get("image_prompt", ""))
                 asset["image_url"] = url or ""
                 if url:
-                    logger.success(f"      ✅ 图片已生成")
+                    logger.success(f"      OK 图片已生成")
                 else:
                     logger.info(f"      ℹ️ 图片生成需额外充值")
             return result
