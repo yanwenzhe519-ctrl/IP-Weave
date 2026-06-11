@@ -430,7 +430,7 @@ contract IPWeaveNFT {
     def _print_thinking_log(self):
         """打印完整思考日志（用于评审）"""
         print("\n" + "="*60)
-        print("  📋 Agent 完整思考日志")
+        print("  Agent 完整思考日志")
         print("="*60)
         for entry in self.thinking_log:
             e = entry["emoji"]
