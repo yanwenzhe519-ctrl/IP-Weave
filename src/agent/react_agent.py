@@ -224,18 +224,24 @@ contract IPWeaveNFT {
     string public name = "IP Weave";
     string public symbol = "IPW";
     mapping(uint256 => address) private _owners;
+    mapping(address => uint256) private _balances;
     uint256 private _total;
     address public owner;
-    event Minted(uint256 tokenId, address to);
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     constructor() { owner = msg.sender; }
     function mint(address to) public returns (uint256) {
         require(msg.sender == owner);
         _total++;
         _owners[_total] = to;
-        emit Minted(_total, to);
+        _balances[to]++;
+        emit Transfer(address(0), to, _total);
         return _total;
     }
-    function ownerOf(uint256 id) public view returns (address) { return _owners[id]; }
+    function ownerOf(uint256 tokenId) public view returns (address) {
+        require(_owners[tokenId] != address(0), "not exist");
+        return _owners[tokenId];
+    }
+    function balanceOf(address a) public view returns (uint256) { return _balances[a]; }
     function totalSupply() public view returns (uint256) { return _total; }
 }
 '''
@@ -267,16 +273,23 @@ contract IPWeaveNFT {
             contract = w3.eth.contract(abi=abi, bytecode=bytecode)
             nonce = w3.eth.get_transaction_count(acct.address)
 
+            # 动态估算 gas
+            try:
+                gas_est = contract.constructor().estimate_gas({"from": acct.address})
+            except:
+                gas_est = 500000
+            gas_limit = int(gas_est * 1.2) + 50000
+
             tx = contract.constructor().build_transaction({
                 "from": acct.address,
                 "nonce": nonce,
-                "gas": 350000,
+                "gas": gas_limit,
                 "maxFeePerGas": w3.to_wei(5, "gwei"),
                 "maxPriorityFeePerGas": w3.to_wei(1, "gwei"),
                 "chainId": 11155111,
             })
 
-            self._log("📤", "发送部署交易...")
+            self._log("📤", f"发送部署交易 (gas: {gas_limit})...")
             signed = acct.sign_transaction(tx)
             tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
             self._log("⏳", f"等待确认: 0x{tx_hash.hex()[:20]}...")
@@ -289,12 +302,20 @@ contract IPWeaveNFT {
                 self._log("📜", f"地址: {addr}")
                 self._log("🔍", f"https://sepolia.etherscan.io/address/{addr}")
 
-                self._log("🔨", "铸造 NFT Token #1...")
+                # 铸造到用户的钱包（硬编码或环境变量）
+                target_wallet = os.environ.get("NFT_RECEIVER", acct.address)
+                self._log("🔨", f"铸造 NFT 到 {target_wallet}...")
+
                 nonce2 = w3.eth.get_transaction_count(acct.address)
-                mint_tx = contract(addr).functions.mint(acct.address).build_transaction({
+                try:
+                    mint_gas = contract(addr).functions.mint(target_wallet).estimate_gas({"from": acct.address})
+                except:
+                    mint_gas = 120000
+
+                mint_tx = contract(addr).functions.mint(target_wallet).build_transaction({
                     "from": acct.address,
                     "nonce": nonce2,
-                    "gas": 80000,
+                    "gas": int(mint_gas * 1.2) + 20000,
                     "maxFeePerGas": w3.to_wei(5, "gwei"),
                     "maxPriorityFeePerGas": w3.to_wei(1, "gwei"),
                     "chainId": 11155111,
@@ -304,7 +325,7 @@ contract IPWeaveNFT {
                 receipt2 = w3.eth.wait_for_transaction_receipt(tx_hash2, timeout=60)
 
                 if receipt2["status"] == 1:
-                    self._log("✅", f"铸造成功!")
+                    self._log("✅", f"铸造成功! Token #1")
                     self._log("🔍", f"https://sepolia.etherscan.io/tx/0x{tx_hash2.hex()}")
                 else:
                     self._log("⚠️", "铸造失败")
