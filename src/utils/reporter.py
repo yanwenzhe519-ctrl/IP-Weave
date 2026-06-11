@@ -80,17 +80,17 @@ h1 {{font-size:2.8em;font-weight:900;background:linear-gradient(135deg,#4ade80,#
 
 <div class="cards">
 <a class="card" href="{rel(story_path)}">
-<div class="card-icon">📖</div>
+<div class="card-icon">STORY</div>
 <h3>衍生故事</h3>
 <div class="score">{scores.get('story','?')}/10</div>
 </a>
 <a class="card" href="{rel(script_path)}">
-<div class="card-icon">🎬</div>
+<div class="card-icon">SCRIPT</div>
 <h3>动画分镜</h3>
 <div class="score">{scores.get('script','?')}/10</div>
 </a>
 <a class="card" href="{rel(asset_path)}">
-<div class="card-icon">🧸</div>
+<div class="card-icon">ASSET</div>
 <h3>周边资产</h3>
 <div class="score">{scores.get('asset','?')}/10</div>
 </a>
@@ -139,7 +139,7 @@ body {{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Serif SC',serif;line-h
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>📖 {ip_name} · 衍生故事</h1></div>
+<div class="header"><h1>STORY {ip_name} · 衍生故事</h1></div>
 <div class="content">{content}</div>
 <div class="footer">由 GLM-5.1 自主创作</div>
 </div>
@@ -173,7 +173,7 @@ tr:hover {{background:rgba(255,255,255,0.02);}}
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>🎬 {ip_name} · 动画分镜脚本</h1></div>
+<div class="header"><h1>SCRIPT {ip_name} · 动画分镜脚本</h1></div>
 <div class="content">{content}</div>
 <div class="footer">由 GLM-5.1 根据衍生故事自动生成</div>
 </div>
@@ -191,7 +191,7 @@ def _make_asset_page(ip_name, assets):
             img_block = f'<div class="placeholder">🎨 CogView-3 出图需额外充值</div>'
         items_html += f"""
 <div class="asset-card">
-<h2>🎯 {asset.get('name','未命名')}</h2>
+<h2>DECIDE {asset.get('name','未命名')}</h2>
 <div class="tag">{asset.get('type','概念设计')}</div>
 <div class="desc">{asset.get('description','')}</div>
 <div class="style"><strong>风格要点：</strong>{asset.get('style_notes','')}</div>
@@ -222,7 +222,7 @@ body {{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;}}
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>🧸 {ip_name} · 周边资产概念设计</h1></div>
+<div class="header"><h1>ASSET {ip_name} · 周边资产概念设计</h1></div>
 {items_html}
 <div class="footer">由 GLM-5.1 + CogView-3 设计</div>
 </div>
