@@ -9,12 +9,14 @@ PRESET_IPS = {
         "contract": "0x6982508145454Ce325dDbE47a25d4ec3d2311933",
         "name": "Pepe the Frog",
         "symbol": "PEPE",
-        "description": "诞生于互联网的传奇 meme 青蛙。绿色皮肤，标志性表情，从 4chan 走向世界的文化符号。",
+        "description": "Matt Furie 创作的经典青蛙角色。绿色皮肤、突出的大眼睛、标志性的半圆嘴巴。互联网 Meme 文化的图腾级 IP，从 4chan 走向世界的文化符号。",
         "attributes": [
-            {"trait_type": "世界观", "value": "互联网次元 · Meme 宇宙"},
-            {"trait_type": "色调", "value": "经典蛙绿 + 暗黑紫"},
+            {"trait_type": "世界观", "value": "互联网 Meme 宇宙 · Boy's Club"},
+            {"trait_type": "角色类型", "value": "拟人化青蛙"},
+            {"trait_type": "特征", "value": "绿色皮肤 · 突出大眼睛 · 半圆嘴"},
+            {"trait_type": "色调", "value": "蛙绿 #4ade80 + 忧郁紫"},
             {"trait_type": "阵营", "value": "混沌善良"},
-            {"trait_type": "标志特征", "value": "绿色皮肤 · 忧郁眼神 · 跨文化 meme 基因"},
+            {"trait_type": "创作者", "value": "Matt Furie"},
         ]
     },
     "bayc": {

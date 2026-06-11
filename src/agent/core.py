@@ -9,6 +9,8 @@ from src.utils.style import StyleAnalyzer, StyleChecker
 from src.chain.reader import OnChainIPReader
 from src.content.generators import StoryGenerator, ScriptGenerator, AssetDesigner
 from src.utils.reporter import generate_html_report
+from src.utils.visualizer import save_visual_assets
+from src.chain.publisher import NFTPublisher
 
 
 class IPWeaveAgent:
@@ -130,6 +132,9 @@ class IPWeaveAgent:
         with open(assets_path, "w", encoding="utf-8") as f:
             json.dump(self.results.get("assets_result", {}), f, ensure_ascii=False, indent=2)
 
+        # 生成 SVG 视觉资产
+        save_visual_assets(out_dir, self.style_profile, self.results.get("assets_result", {}))
+
         # 生成 HTML 报告
         report = generate_html_report(
             ip_name=self.chain_data.get("metadata", {}).get("name", "IP"),
@@ -138,6 +143,23 @@ class IPWeaveAgent:
             assets=self.results.get("assets_result", {}),
             output_dir=out_dir,
         )
+
+        # ── 上链准备 ──
+        logger.info("")
+        logger.info("═══════════════════════════════════")
+        logger.info("🔗 准备链上发布")
+        logger.info("═══════════════════════════════════")
+        publisher = NFTPublisher(out_dir)
+        ip_name = self.chain_data.get("metadata", {}).get("name", "IP")
+        publisher.prepare_metadata(
+            ip_name=ip_name,
+            story_text=self.results.get("story_text", ""),
+            script_text=self.results.get("script_text", ""),
+            assets=self.results.get("assets_result", {}),
+        )
+        publisher.generate_deploy_script()
+        logger.info(f"  部署指南: {out_dir}/nft/DEPLOY_README.md")
+        logger.info(f"  查看后手动部署即可上链")
 
         logger.info("")
         logger.info("═══════════════════════════════════")
