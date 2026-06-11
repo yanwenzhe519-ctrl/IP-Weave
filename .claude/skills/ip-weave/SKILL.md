@@ -1,5 +1,5 @@
 ---
-name: ip-weave
+name: IP-Weave
 description: 链上 IP 衍生内容 Agent — 基于 GLM-5.1 的自主创作 Agent
 model: glm-5.1
 when: 用户需要为链上 IP 生成衍生故事、动画脚本、周边资产并上链时
