@@ -49,8 +49,8 @@ class ReActAgent:
             ip_name = contract
         self.contract_address = contract
         self.target_ip = ip_name
-        self._log("🧠", f"IP Weave Agent 启动，目标: {ip_name}")
-        self._log("📋", f"任务: 基于链上 IP，自主生成衍生故事、动画脚本、周边资产")
+        self._log("AGENT", f"IP Weave Agent 启动，目标: {ip_name}")
+        self._log("TASK  ", f"任务: 基于链上 IP，自主生成衍生故事、动画脚本、周边资产")
 
         step_count = 0
         done = False
@@ -58,11 +58,11 @@ class ReActAgent:
         while not done and step_count < self.max_steps:
             step_count += 1
             self._log("", f"\n{'='*50}")
-            self._log("🔄", f"循环 #{step_count}")
+            self._log("STEP  ", f"循环 #{step_count}")
 
             # GLM-5.1 自主决定下一步做什么
             action = self._decide_next_action()
-            self._log("🎯", f"GLM-5.1 决定执行: {action}")
+            self._log("DECIDE", f"GLM-5.1 决定执行: {action}")
 
             # 执行决策的动作
             result = self._execute_action(action, ip_name)
@@ -70,9 +70,9 @@ class ReActAgent:
             if action == "deliver":
                 done = True
             elif not result:
-                self._log("⚠️", f"动作执行失败，尝试其他方案")
+                self._log("WARN  ", f"动作执行失败，尝试其他方案")
 
-        self._log("✅", f"Agent 任务完成! 共执行 {step_count} 个循环")
+        self._log("OK    ", f"Agent 任务完成! 共执行 {step_count} 个循环")
 
     def _decide_next_action(self) -> str:
         """GLM-5.1 根据当前状态，自主决定下一步动作"""
@@ -107,7 +107,7 @@ class ReActAgent:
         ])
         action = result.get("action", "read_ip") if result else "read_ip"
         reason = result.get("reason", "")
-        self._log("💡", f"决策理由: {reason}")
+        self._log("REASON", f"决策理由: {reason}")
         return action
 
     def _execute_action(self, action: str, ip_name: str) -> bool:
@@ -118,7 +118,7 @@ class ReActAgent:
         if action == "read_ip":
             target = self.contract_address if self.contract_address else ip_name
             self.chain_data = self.reader.fetch(ip_name=target, contract=self.contract_address)
-            self._log("📦", f"读取完成: {self.chain_data.get('name', '')}")
+            self._log("DATA  ", f"读取完成: {self.chain_data.get('name', '')}")
             return True
 
         elif action == "analyze_style":
@@ -144,7 +144,7 @@ class ReActAgent:
                 {"role": "system", "content": "你是 IP 内容策略师。"},
                 {"role": "user", "content": prompt}
             ])
-            self._log("📋", f"计划: {self.plan.get('narrative_direction', '')[:60]}..." if self.plan else "计划失败")
+            self._log("TASK  ", f"计划: {self.plan.get('narrative_direction', '')[:60]}..." if self.plan else "计划失败")
             return bool(self.plan)
 
         elif action == "write_story":
@@ -154,7 +154,7 @@ class ReActAgent:
             text = gen.generate(self.style_profile, self.plan)
             if text and len(text) > 200:
                 self.story_text = text
-                self._log("📖", f"故事完成 ({len(text)} 字)")
+                self._log("STORY ", f"故事完成 ({len(text)} 字)")
                 return True
             return False
 
@@ -165,7 +165,7 @@ class ReActAgent:
             text = gen.generate(self.story_text, self.style_profile)
             if text and len(text) > 100:
                 self.script_text = text
-                self._log("🎬", f"脚本完成 ({len(text)} 字)")
+                self._log("SCRIPT", f"脚本完成 ({len(text)} 字)")
                 return True
             return False
 
@@ -175,7 +175,7 @@ class ReActAgent:
             gen = AssetDesigner()
             self.assets_result = gen.generate(self.style_profile)
             count = len(self.assets_result.get("assets", []))
-            self._log("🧸", f"资产设计完成 ({count} 款)")
+            self._log("ASSET ", f"资产设计完成 ({count} 款)")
             return count > 0
 
         elif action == "check_quality":
@@ -195,7 +195,7 @@ class ReActAgent:
             scores = []
             for k, v in results.items():
                 scores.append(f"{k}:{v.get('score',0)}")
-            self._log("📊", f"质量评分: {', '.join(scores)}")
+            self._log("SCORE ", f"质量评分: {', '.join(scores)}")
             return True
 
         elif action == "deploy_to_chain":
@@ -209,7 +209,7 @@ class ReActAgent:
 
     def _deploy_to_sepolia(self) -> bool:
         """将合约部署到 Sepolia 测试网并铸造 NFT"""
-        self._log("🔗", "正在部署合约到 Sepolia 测试网...")
+        self._log("CHAIN ", "正在部署合约到 Sepolia 测试网...")
 
         try:
             from web3 import Web3
@@ -254,16 +254,16 @@ contract IPWeaveNFT {
             w3 = Web3(Web3.HTTPProvider(RPC))
 
             if not w3.is_connected():
-                self._log("❌", "无法连接 Sepolia RPC")
+                self._log("FAIL  ", "无法连接 Sepolia RPC")
                 return False
 
             acct = Account.from_key(PRIVATE_KEY)
             balance = w3.eth.get_balance(acct.address)
-            self._log("💰", f"部署钱包: {acct.address}")
-            self._log("💰", f"余额: {w3.from_wei(balance, 'ether')} ETH")
+            self._log("WALLET", f"部署钱包: {acct.address}")
+            self._log("WALLET", f"余额: {w3.from_wei(balance, 'ether')} ETH")
 
             if balance < w3.to_wei(0.003, "ether"):
-                self._log("❌", f"余额不足，需要 0.003 ETH，当前 {w3.from_wei(balance, 'ether')} ETH")
+                self._log("FAIL  ", f"余额不足，需要 0.003 ETH，当前 {w3.from_wei(balance, 'ether')} ETH")
                 return False
 
             compiled = compile_source(SOURCE, output_values=["abi", "bin"])
@@ -289,22 +289,22 @@ contract IPWeaveNFT {
                 "chainId": 11155111,
             })
 
-            self._log("📤", f"发送部署交易 (gas: {gas_limit})...")
+            self._log("SEND  ", f"发送部署交易 (gas: {gas_limit})...")
             signed = acct.sign_transaction(tx)
             tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
-            self._log("⏳", f"等待确认: 0x{tx_hash.hex()[:20]}...")
+            self._log("WAIT  ", f"等待确认: 0x{tx_hash.hex()[:20]}...")
 
             receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
 
             if receipt["status"] == 1:
                 addr = receipt["contractAddress"]
-                self._log("✅", f"合约部署成功!")
-                self._log("📜", f"地址: {addr}")
-                self._log("🔍", f"https://sepolia.etherscan.io/address/{addr}")
+                self._log("OK    ", f"合约部署成功!")
+                self._log("ADDR  ", f"地址: {addr}")
+                self._log("LINK  ", f"https://sepolia.etherscan.io/address/{addr}")
 
                 # 铸造到用户的钱包（硬编码或环境变量）
                 target_wallet = os.environ.get("NFT_RECEIVER", acct.address)
-                self._log("🔨", f"铸造 NFT 到 {target_wallet}...")
+                self._log("MINT  ", f"铸造 NFT 到 {target_wallet}...")
 
                 nonce2 = w3.eth.get_transaction_count(acct.address)
                 try:
@@ -325,17 +325,17 @@ contract IPWeaveNFT {
                 receipt2 = w3.eth.wait_for_transaction_receipt(tx_hash2, timeout=60)
 
                 if receipt2["status"] == 1:
-                    self._log("✅", f"铸造成功! Token #1")
-                    self._log("🔍", f"https://sepolia.etherscan.io/tx/0x{tx_hash2.hex()}")
+                    self._log("OK    ", f"铸造成功! Token #1")
+                    self._log("LINK  ", f"https://sepolia.etherscan.io/tx/0x{tx_hash2.hex()}")
                 else:
-                    self._log("⚠️", "铸造失败")
+                    self._log("WARN  ", "铸造失败")
                 return True
             else:
-                self._log("❌", f"部署失败，gas used: {receipt['gasUsed']}")
+                self._log("FAIL  ", f"部署失败，gas used: {receipt['gasUsed']}")
                 return False
 
         except Exception as e:
-            self._log("❌", f"部署异常: {str(e)[:100]}")
+            self._log("FAIL  ", f"部署异常: {str(e)[:100]}")
             return False
 
     def _build_status(self) -> dict:
@@ -394,17 +394,17 @@ contract IPWeaveNFT {
         )
         publisher.generate_deploy_script()
 
-        self._log("🎉", f"全部交付完成! → {out_dir}")
-        self._log("🔗", f"合约已部署: Sepolia 测试网")
-        self._log("📋", f"思考日志共 {len(self.thinking_log)} 条")
+        self._log("DONE  ", f"全部交付完成! → {out_dir}")
+        self._log("CHAIN ", f"合约已部署: Sepolia 测试网")
+        self._log("TASK  ", f"思考日志共 {len(self.thinking_log)} 条")
 
         # 打印思考日志
         self._print_thinking_log()
 
-    def _log(self, emoji: str, msg: str):
-        line = f"{emoji} {msg}" if emoji else msg
+    def _log(self, tag: str, msg: str):
+        line = f"[{tag}] {msg}" if tag else msg
         logger.info(line)
-        self.thinking_log.append({"emoji": emoji, "msg": msg})
+        self.thinking_log.append({"tag": tag, "msg": msg})
 
     def _print_thinking_log(self):
         """打印完整思考日志（用于评审）"""
