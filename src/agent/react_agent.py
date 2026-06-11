@@ -345,6 +345,11 @@ contract IPWeaveNFT {
             with open(os.path.join(out_dir, suffix), "w", encoding="utf-8") as f:
                 f.write(content)
 
+        # 保存资产信息（含图片 URL）
+        assets_path = os.path.join(out_dir, "assets_info.json")
+        with open(assets_path, "w", encoding="utf-8") as f:
+            json.dump(self.assets_result, f, ensure_ascii=False, indent=2)
+
         # SVG 视觉
         if self.style_profile:
             save_visual_assets(out_dir, self.style_profile, self.assets_result)

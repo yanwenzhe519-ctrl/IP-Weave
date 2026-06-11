@@ -8,9 +8,16 @@ from src.utils.llm import glm
 class StyleAnalyzer:
     def extract(self, chain_data: dict) -> dict:
         logger.info("→ [GLM-5.1] 提取 IP 风格指纹...")
-        prompt = f"""分析以下链上 IP 数据，提取风格特征，返回 JSON。
+        prompt = f"""分析以下链上 IP，结合你对这个 IP 的了解，提取真实的风格特征，返回 JSON。
 
 链上数据：{json.dumps(chain_data, ensure_ascii=False, indent=2)}
+
+要求：
+- 结合你对该 IP 的了解，不要泛泛而谈
+- 美术风格要具体（比如"粗线条美式地下漫画"不是"数字插画"）
+- 角色设计要抓住真正特征
+- 叙事基调要符合该 IP 的真实气质
+- 如果是知名 IP（如 Pepe、BAYC），基于真实背景分析
 
 JSON 格式：
 {{
@@ -18,10 +25,11 @@ JSON 格式：
   "narrative": {{"tone": "基调", "genre": "类型", "setting": "世界观", "core_theme": "核心主题"}},
   "vibe": ["氛围词"],
   "character_archetype": "角色原型",
-  "tone_tags": ["语气标签"]
+  "tone_tags": ["语气标签"],
+  "background": "这个 IP 的真实背景和故事"
 }}"""
         result = glm.chat_json([
-            {"role": "system", "content": "你是专业的 IP 风格分析师。"},
+            {"role": "system", "content": "你是专业的 IP 风格分析师。你对所有知名链上 IP 的背景、美术风格、叙事特征有深入了解。"},
             {"role": "user", "content": prompt}
         ])
         if result:

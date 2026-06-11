@@ -62,16 +62,25 @@ class GLMClient:
             return {}
 
     def generate_image(self, prompt: str) -> str | None:
+        # 使用独立的图片 API key 和 endpoint
+        img_key = settings.ZHIPUAI_IMAGE_KEY or self.api_key
+        img_url = (settings.ZHIPUAI_IMAGE_URL or self.base_url).rstrip("/")
+        headers = {
+            "Authorization": f"Bearer {img_key}",
+            "Content-Type": "application/json"
+        }
         try:
             resp = httpx.post(
-                f"{self.base_url}/images/generations",
-                headers=self.headers,
-                json={"model": settings.IMAGE_MODEL, "prompt": prompt},
+                f"{img_url}/images/generations",
+                headers=headers,
+                json={"model": "cogview-4-250304", "prompt": prompt, "size": "1024x1024"},
                 timeout=120
             )
             if resp.status_code == 200:
-                return resp.json()["data"][0]["url"]
-            logger.warning(f"CogView 需额外充值 ({resp.status_code})")
+                url = resp.json()["data"][0]["url"]
+                logger.success(f"  图片已生成")
+                return url
+            logger.warning(f"CogView 失败 ({resp.status_code})")
             return None
         except Exception as e:
             logger.warning(f"图片生成异常: {str(e)[:60]}")
