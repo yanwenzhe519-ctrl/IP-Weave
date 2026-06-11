@@ -158,8 +158,8 @@ h2 {{color:#fff;margin:32px 0 16px;font-size:1.1em;}}
 <p style="color:#666;margin-bottom:24px;">SVG 矢量图形 · 由代码直接生成</p>
 <h2>🧑 角色概念</h2>
 <div style="display:flex;justify-content:center;"><div class="card char-card"><img src="character.svg" alt="Character"><div class="label">{ip_name}</div></div></div>
-<h2>🎬 分镜场景</h2><div class="grid">{scene_cards}</div>
-<h2>🧸 周边资产</h2><div class="grid">{asset_cards}</div>
+<h2>SCRIPT 分镜场景</h2><div class="grid">{scene_cards}</div>
+<h2>ASSET 周边资产</h2><div class="grid">{asset_cards}</div>
 <div class="footer">由 IP Weave · GLM-5.1 驱动生成</div>
 </div></body></html>'''
 
