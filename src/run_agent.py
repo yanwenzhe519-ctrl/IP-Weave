@@ -16,7 +16,8 @@ def main():
     print("========================================")
     print()
 
-    target = input("输入链上 IP 合约地址（回车使用 Pepe）: ").strip()
+    print("  可选: pepe / bayc / punk / azuki / 合约地址")
+    target = input("输入链上 IP 名称（回车使用 Pepe）: ").strip()
 
     if not settings.is_configured:
         print("请在 .env 中配置 ZHIPUAI_API_KEY")
@@ -31,7 +32,10 @@ def main():
     print()
 
     agent = ReActAgent()
-    agent.run(contract=target)
+    if target.startswith("0x"):
+        agent.run(contract=target)
+    else:
+        agent.run(ip_name=target if target else "pepe")
 
     print()
     print("========================================")
