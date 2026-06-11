@@ -27,6 +27,7 @@ class ReActAgent:
         "write_script": "将故事转为动画分镜脚本",
         "design_assets": "设计周边资产概念",
         "check_quality": "检查内容质量和风格一致性",
+        "deploy_to_chain": "将合约部署到 Sepolia 测试网并铸造 NFT",
         "deliver": "交付最终成果",
     }
 
@@ -93,7 +94,9 @@ class ReActAgent:
 - 写了脚本但没设计资产 → design_assets
 - 内容生成后 → check_quality
 - 质量通过 → deliver
-- 质量不通过 → 重新生成"""
+- 质量不通过 → 重新生成
+- 所有内容质量合格但未上链 → deploy_to_chain
+- 已上链 → deliver"""
         result = glm.chat_json([
             {"role": "system", "content": "你是自主决策的 AI Agent。"},
             {"role": "user", "content": prompt}
@@ -190,11 +193,124 @@ class ReActAgent:
             self._log("📊", f"质量评分: {', '.join(scores)}")
             return True
 
+        elif action == "deploy_to_chain":
+            return self._deploy_to_sepolia()
+
         elif action == "deliver":
             self._final_deliver(ip_name)
             return True
 
         return False
+
+    def _deploy_to_sepolia(self) -> bool:
+        """将合约部署到 Sepolia 测试网并铸造 NFT"""
+        self._log("🔗", "正在部署合约到 Sepolia 测试网...")
+
+        try:
+            from web3 import Web3
+            from eth_account import Account
+            from solcx import install_solc, set_solc_version, compile_source
+
+            RPC = "https://ethereum-sepolia-rpc.publicnode.com"
+
+            SOURCE = '''
+pragma solidity ^0.8.20;
+contract IPWeaveNFT {
+    string public name = "IP Weave";
+    string public symbol = "IPW";
+    mapping(uint256 => address) private _owners;
+    uint256 private _total;
+    address public owner;
+    event Minted(uint256 tokenId, address to);
+    constructor() { owner = msg.sender; }
+    function mint(address to) public returns (uint256) {
+        require(msg.sender == owner);
+        _total++;
+        _owners[_total] = to;
+        emit Minted(_total, to);
+        return _total;
+    }
+    function ownerOf(uint256 id) public view returns (address) { return _owners[id]; }
+    function totalSupply() public view returns (uint256) { return _total; }
+}
+'''
+            PRIVATE_KEY = os.environ.get("DEPLOY_KEY", "")
+            if not PRIVATE_KEY:
+                PRIVATE_KEY = "2efd25ac95a66421e4116bf8d9125c78eca43a613f44c16dbbacbd82c046d2b3"
+
+            install_solc("0.8.20")
+            set_solc_version("0.8.20")
+            w3 = Web3(Web3.HTTPProvider(RPC))
+
+            if not w3.is_connected():
+                self._log("❌", "无法连接 Sepolia RPC")
+                return False
+
+            acct = Account.from_key(PRIVATE_KEY)
+            balance = w3.eth.get_balance(acct.address)
+            self._log("💰", f"部署钱包: {acct.address}")
+            self._log("💰", f"余额: {w3.from_wei(balance, 'ether')} ETH")
+
+            if balance < w3.to_wei(0.003, "ether"):
+                self._log("❌", f"余额不足，需要 0.003 ETH，当前 {w3.from_wei(balance, 'ether')} ETH")
+                return False
+
+            compiled = compile_source(SOURCE, output_values=["abi", "bin"])
+            data = list(compiled.values())[0]
+            abi, bytecode = data["abi"], "0x" + data["bin"]
+
+            contract = w3.eth.contract(abi=abi, bytecode=bytecode)
+            nonce = w3.eth.get_transaction_count(acct.address)
+
+            tx = contract.constructor().build_transaction({
+                "from": acct.address,
+                "nonce": nonce,
+                "gas": 350000,
+                "maxFeePerGas": w3.to_wei(5, "gwei"),
+                "maxPriorityFeePerGas": w3.to_wei(1, "gwei"),
+                "chainId": 11155111,
+            })
+
+            self._log("📤", "发送部署交易...")
+            signed = acct.sign_transaction(tx)
+            tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
+            self._log("⏳", f"等待确认: 0x{tx_hash.hex()[:20]}...")
+
+            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=180)
+
+            if receipt["status"] == 1:
+                addr = receipt["contractAddress"]
+                self._log("✅", f"合约部署成功!")
+                self._log("📜", f"地址: {addr}")
+                self._log("🔍", f"https://sepolia.etherscan.io/address/{addr}")
+
+                self._log("🔨", "铸造 NFT Token #1...")
+                nonce2 = w3.eth.get_transaction_count(acct.address)
+                mint_tx = contract(addr).functions.mint(acct.address).build_transaction({
+                    "from": acct.address,
+                    "nonce": nonce2,
+                    "gas": 80000,
+                    "maxFeePerGas": w3.to_wei(5, "gwei"),
+                    "maxPriorityFeePerGas": w3.to_wei(1, "gwei"),
+                    "chainId": 11155111,
+                })
+                signed2 = acct.sign_transaction(mint_tx)
+                tx_hash2 = w3.eth.send_raw_transaction(signed2.raw_transaction)
+                receipt2 = w3.eth.wait_for_transaction_receipt(tx_hash2, timeout=60)
+
+                if receipt2["status"] == 1:
+                    self._log("✅", f"铸造成功!")
+                    self._log("🔍", f"https://sepolia.etherscan.io/tx/0x{tx_hash2.hex()}")
+                else:
+                    self._log("⚠️", "铸造失败")
+                return True
+            else:
+                self._log("❌", f"部署失败，gas used: {receipt['gasUsed']}")
+                return False
+
+        except Exception as e:
+            self._log("❌", f"部署异常: {str(e)[:100]}")
+            return False
 
     def _build_status(self) -> dict:
         """构建当前状态摘要"""
@@ -205,6 +321,7 @@ class ReActAgent:
             "has_story": bool(self.story_text and len(self.story_text) > 200),
             "has_script": bool(self.script_text and len(self.script_text) > 100),
             "has_assets": bool(self.assets_result.get("assets")),
+            "has_deployed": False,
             "quality_scores": self.quality_scores,
         }
 
