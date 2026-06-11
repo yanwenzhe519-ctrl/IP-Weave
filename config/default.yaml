@@ -1,0 +1,12 @@
+agent:
+  name: IP-Weave
+  llm: glm-5.1
+  max_iterations: 15
+  
+chain:
+  rpc: https://ethereum-rpc.publicnode.com
+  sepolia_rpc: https://ethereum-sepolia-rpc.publicnode.com
+  
+output:
+  dir: ./output
+  formats: [html, svg, json]
