@@ -1,0 +1,10 @@
+{
+  "name": "ip-weave",
+  "version": "1.0.0",
+  "description": "基于 GLM-5.1 的链上 IP 衍生内容 Agent",
+  "scripts": {
+    "start": "python src/run_agent.py --ip pepe",
+    "deploy": "python deploy.py"
+  },
+  "license": "MIT"
+}
