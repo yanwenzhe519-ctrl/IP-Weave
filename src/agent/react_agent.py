@@ -225,21 +225,27 @@ contract IPWeaveNFT {
     string public symbol = "IPW";
     mapping(uint256 => address) private _owners;
     mapping(address => uint256) private _balances;
+    mapping(uint256 => string) private _tokenURIs;
     uint256 private _total;
     address public owner;
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     constructor() { owner = msg.sender; }
-    function mint(address to) public returns (uint256) {
+    function mint(address to, string memory tokenURI_) public returns (uint256) {
         require(msg.sender == owner);
         _total++;
         _owners[_total] = to;
         _balances[to]++;
+        _tokenURIs[_total] = tokenURI_;
         emit Transfer(address(0), to, _total);
         return _total;
     }
     function ownerOf(uint256 tokenId) public view returns (address) {
         require(_owners[tokenId] != address(0), "not exist");
         return _owners[tokenId];
+    }
+    function tokenURI(uint256 tokenId) public view returns (string memory) {
+        require(_owners[tokenId] != address(0), "not exist");
+        return _tokenURIs[tokenId];
     }
     function balanceOf(address a) public view returns (uint256) { return _balances[a]; }
     function totalSupply() public view returns (uint256) { return _total; }
@@ -306,16 +312,31 @@ contract IPWeaveNFT {
                 target_wallet = os.environ.get("NFT_RECEIVER", acct.address)
                 self._log("MINT  ", f"铸造 NFT 到 {target_wallet}...")
 
-                nonce2 = w3.eth.get_transaction_count(acct.address)
-                try:
-                    mint_gas = contract(addr).functions.mint(target_wallet).estimate_gas({"from": acct.address})
-                except:
-                    mint_gas = 120000
+                # 构建 metadata（数据 URI，不上 IPFS）
+                import base64
+                svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#0a0a0f"/><circle cx="200" cy="200" r="100" fill="#4ade80" opacity="0.3"/><text x="200" y="210" text-anchor="middle" fill="#fff" font-size="20">IP Weave</text><text x="200" y="240" text-anchor="middle" fill="#888" font-size="12">' + (self.chain_data.get("name","NFT") if self.chain_data else "NFT") + '</text></svg>'
+                svg_b64 = base64.b64encode(svg.encode()).decode()
 
-                mint_tx = contract(addr).functions.mint(target_wallet).build_transaction({
+                meta = {
+                    "name": f"IP Weave - {(self.chain_data.get('name','') if self.chain_data else '')}",
+                    "description": (self.story_text or "")[:500],
+                    "image": f"data:image/svg+xml;base64,{svg_b64}",
+                    "attributes": [
+                        {"trait_type": "IP", "value": self.chain_data.get("name","") if self.chain_data else ""},
+                        {"trait_type": "生成引擎", "value": "GLM-5.1"}
+                    ]
+                }
+                meta_json = json.dumps(meta, ensure_ascii=False)
+                meta_b64 = base64.b64encode(meta_json.encode()).decode()
+                token_uri = f"data:application/json;base64,{meta_b64}"
+
+                nonce2 = w3.eth.get_transaction_count(acct.address)
+                self._log("MINT  ", "铸造 NFT (含元数据)...")
+
+                mint_tx = contract(addr).functions.mint(target_wallet, token_uri).build_transaction({
                     "from": acct.address,
                     "nonce": nonce2,
-                    "gas": int(mint_gas * 1.2) + 20000,
+                    "gas": 200000,
                     "maxFeePerGas": w3.to_wei(5, "gwei"),
                     "maxPriorityFeePerGas": w3.to_wei(1, "gwei"),
                     "chainId": 11155111,
