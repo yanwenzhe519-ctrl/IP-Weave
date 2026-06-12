@@ -8,25 +8,43 @@ from src.utils.llm import glm
 class StoryGenerator:
     def generate(self, style_profile: dict, plan: dict) -> str:
         logger.info("  → [GLM-5.1] 创作衍生故事...")
-        prompt = f"""你是一位获得过星云奖的科幻作家。请根据以下 IP 的风格画像和创作计划，创作一篇高质量的衍生故事。
+        # 构建一个详细的 IP 背景描述
+        ip_context = self._build_ip_context(style_profile)
+        
+        prompt = f"""你是一位获得过星云奖的杰出作家。请根据以下 IP 信息，创作一篇高质量的衍生故事。
 
-IP 风格画像：
-{json.dumps(style_profile, ensure_ascii=False, indent=2)}
+IP 名称与背景：
+{ip_context}
 
-创作计划：
+创作方向：
 {json.dumps(plan, ensure_ascii=False, indent=2)}
 
 写作要求：
-- 故事必须忠实于原始 IP 的世界观和角色气质
-- 要有独特的文学质感，避免 AI 套话
-- 人物塑造要有深度，对话要自然
-- 场景描写要有画面感
-- 要写一个完整的故事，有开头、发展、高潮和结尾
-- 篇幅不限，写到故事自然收束为止
-- 必须包含具体的人物、场景、情节，不能只写片段或设定说明
-- 直接写故事，不要先分析或解释"""
+1. 故事必须深刻反映这个 IP 的核心精神气质
+2. 开头要有代入感，能立即把读者拉入这个世界
+3. 人物要有真实的动机和情感弧线
+4. 要有原创性，不是简单的复述已知内容
+5. 场景描写要具体，有画面感
+6. 对话要自然，能体现角色性格
+7. 高潮部分要有情感冲击力
+8. 结尾要有余韵，让人回味
+
+直接写故事，不要分析或解释。"""
+
+    def _build_ip_context(self, profile):
+        v = profile.get('visual', {})
+        n = profile.get('narrative', {})
+        ctx = f"""
+世界观：{n.get('setting','未知')}
+风格基调：{n.get('tone','未知')}
+核心主题：{n.get('core_theme','未知')}
+视觉风格：{v.get('art_style','未知')}，配色：{', '.join(v.get('palette',['未知']))}
+角色原型：{profile.get('character_archetype','未知')}
+氛围：{', '.join(profile.get('vibe',['未知']))}
+"""
+        return ctx
         return glm.chat([
-            {"role": "system", "content": "你是星云奖级别的科幻作家。直接写一个完整的故事。不要分析，不要解释，不要写设定说明。只写故事本身。"},
+            {"role": "system", "content": "你是星云奖级别的杰出作家。你擅长深入理解 IP 的核心精神，创作出既有原作风骨又有独立文学价值的衍生作品。你的文字有温度、有力度、有记忆点。"},
             {"role": "user", "content": prompt}
         ]) or "# 生成失败"
 
@@ -47,6 +65,19 @@ IP 视觉风格：
 - 每个场景要写出具体的视觉氛围、色彩基调、镜头语言
 - 要体现导演的独特视角和审美
 - 格式用 markdown 表格"""
+
+    def _build_ip_context(self, profile):
+        v = profile.get('visual', {})
+        n = profile.get('narrative', {})
+        ctx = f"""
+世界观：{n.get('setting','未知')}
+风格基调：{n.get('tone','未知')}
+核心主题：{n.get('core_theme','未知')}
+视觉风格：{v.get('art_style','未知')}，配色：{', '.join(v.get('palette',['未知']))}
+角色原型：{profile.get('character_archetype','未知')}
+氛围：{', '.join(profile.get('vibe',['未知']))}
+"""
+        return ctx
         return glm.chat([
             {"role": "system", "content": "你是昂西动画节入围导演，擅长将文学作品转化为富有视觉冲击力的动画分镜。你的分镜脚本本身就是艺术品。"},
             {"role": "user", "content": prompt}
