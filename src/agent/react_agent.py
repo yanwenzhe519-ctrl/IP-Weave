@@ -1,140 +1,97 @@
 import os
 import json
-from src.config import settings
+import importlib
 from loguru import logger
+from src.config import settings
 from src.utils.llm import glm
-from src.chain.reader import OnChainIPReader
-from src.utils.style import StyleAnalyzer, StyleChecker
-from src.content.generators import StoryGenerator, ScriptGenerator, AssetDesigner
 
 
 class Agent:
     def __init__(self):
-        self.state = {"ip": "", "data": None, "style": None, "plan": None, "story": "", "script": "", "assets": {}}
+        self.state = {"ip": "", "data": {}, "results": {}}
+        self.skills = {}
         self.history = []
+
+    def register_skill(self, name, module, func, desc, params_desc=""):
+        self.skills[name] = {"module": module, "func": func, "desc": desc, "params": params_desc}
+        self.log("SKILL", "注册技能: " + name + " - " + desc)
 
     def run(self, ip_name=""):
         self.state["ip"] = ip_name
-        self.log("TASK", "目标IP: " + ip_name + " 自主生成衍生故事/动画脚本/周边资产并上链")
-        self.log("PLAN", "流程: 1.读取数据 2.分析风格 3.制定计划 4.生成故事 5.生成脚本 6.设计资产 7.质量检查 8.上链交付")
+        self.log("START", "目标: " + ip_name + " 生成衍生故事/动画脚本/周边资产")
 
-        steps = ["read_ip", "analyze_style", "make_plan", "write_story", "write_script", "design_assets", "check_quality", "deploy"]
+        for rnd in range(20):
+            self.log("LOOP", "思考循环 " + str(rnd+1))
 
-        for step in steps:
-            self.log("STEP", "执行: " + step)
-            ok = self._execute_step(step)
-            if not ok:
-                self.log("FAIL", "步骤失败: " + step)
+            # GLM-5.1 思考下一步
+            thought = self._think()
+            if not thought:
                 break
-            self.log("PASS", "步骤完成: " + step)
 
-        if ok:
-            self._summary()
+            action = thought.get("action", "")
+            skill = thought.get("skill", "")
+            reason = thought.get("reason", "")
+            params = thought.get("params", {})
 
-    def _execute_step(self, step):
+            self.log("THINK", "分析: " + reason[:100])
+            self.log("DECIDE", "决策: " + action + (" -> 技能:" + skill if skill else ""))
+
+            if action == "done":
+                self.log("DONE", "任务完成")
+                break
+
+            if action == "call_skill" and skill in self.skills:
+                self._call_skill(skill, params)
+            elif action == "evaluate":
+                self._evaluate()
+            else:
+                self.log("FAIL", "未知决策: " + action)
+
+    def _think(self):
+        desc = "\n".join([f"  [{k}] {v['desc']}" for k, v in self.skills.items()])
+        params = "\n".join([f"  [{k}] 参数: {v['params']}" for k, v in self.skills.items()])
+        status = "\n".join([f"  {k}: {v}" for k, v in self.state.items() if k != "results"])
+        if self.state.get("results"):
+            status += "\n  已完成: " + str(list(self.state["results"].keys()))
+
+        prompt = "你是IP Weave Agent总指挥。你的任务是: 基于链上IP " + self.state["ip"]
+        prompt += " 生成衍生故事、动画脚本和周边资产。\n\n"
+        prompt += "当前状态:\n" + status + "\n\n"
+        prompt += "可用技能:\n" + desc + "\n\n"
+        prompt += "技能参数:\n" + params + "\n\n"
+        prompt += "返回JSON: {\"action\": \"call_skill/evaluate/done\", \"skill\": \"技能名\", \"params\": {}, \"reason\": \"为什么这么决策\"}\n\n"
+        prompt += "决策规则：\n"
+        prompt += "- 先读取IP数据，再分析风格，然后创作内容，最后检查质量\n"
+        prompt += "- 如果某技能调用失败，尝试其他方案或重试\n"
+        prompt += "- 所有内容生成完毕后执行evaluate\n"
+        prompt += "- evaluate通过后执行done"
+        return glm.chat_json([
+            {"role": "system", "content": "你是IP Weave Agent总指挥。你擅长分析状态、制定策略、调用合适的技能完成任务。你的决策基于当前实际情况，不是固定流程。"},
+            {"role": "user", "content": prompt}
+        ])
+
+    def _call_skill(self, name, params):
+        s = self.skills[name]
+        self.log("EXEC", "调用技能: " + name)
         try:
-            if step == "read_ip":
-                reader = OnChainIPReader()
-                self.state["data"] = reader.fetch(ip_name=self.state["ip"])
-                return True
-
-            elif step == "analyze_style":
-                if not self.state["data"]:
-                    return False
-                analyzer = StyleAnalyzer()
-                self.state["style"] = analyzer.extract(self.state["data"])
-                return bool(self.state["style"])
-
-            elif step == "make_plan":
-                if not self.state["style"]:
-                    return False
-                prompt = '制定衍生内容创作计划。风格:' + json.dumps(self.state["style"], ensure_ascii=False)
-                result = glm.chat_json([{"role": "system", "content": "你是IP内容策略师。"}, {"role": "user", "content": prompt + ' 返回JSON: {"narrative_direction":"方向","key_elements":["元素"]}'}])
-                self.state["plan"] = result or {"narrative_direction": "默认方向", "key_elements": []}
-                return True
-
-            elif step == "write_story":
-                if not self.state["style"] or not self.state["plan"]:
-                    return False
-                gen = StoryGenerator()
-                text = gen.generate(self.state["style"], self.state["plan"])
-                if text and len(text) > 200:
-                    self.state["story"] = text
-                    return True
-                return False
-
-            elif step == "write_script":
-                if not self.state["story"] or not self.state["style"]:
-                    return False
-                gen = ScriptGenerator()
-                text = gen.generate(self.state["story"], self.state["style"])
-                if text and len(text) > 100:
-                    self.state["script"] = text
-                    return True
-                return False
-
-            elif step == "design_assets":
-                if not self.state["style"]:
-                    return False
-                gen = AssetDesigner()
-                self.state["assets"] = gen.generate(self.state["style"])
-                return bool(self.state["assets"].get("assets"))
-
-            elif step == "check_quality":
-                if not self.state["style"]:
-                    return False
-                checker = StyleChecker(self.state["style"])
-                results = []
-                if self.state["story"]:
-                    r = checker.check(self.state["story"], "故事")
-                    results.append("故事:" + str(r.get("score", 0)))
-                if self.state["script"]:
-                    r = checker.check(self.state["script"], "脚本")
-                    results.append("脚本:" + str(r.get("score", 0)))
-                if self.state["assets"]:
-                    r = checker.check(json.dumps(self.state["assets"], ensure_ascii=False), "资产")
-                    results.append("资产:" + str(r.get("score", 0)))
-                self.log("SCORE", " ".join(results))
-                return True
-
-            elif step == "deploy":
-                self._deploy_prepare()
-                return True
-
+            mod = importlib.import_module(s["module"])
+            func = getattr(mod, s["func"])
+            result = func(**params)
+            self.state["results"][name] = "ok"
+            if hasattr(result, 'get'):
+                self.state["data"].update(result)
+            self.log("OK", name + " 成功")
         except Exception as e:
-            self.log("FAIL", str(e)[:100])
-            return False
+            self.log("FAIL", name + " 失败: " + str(e)[:100])
 
-    def _deploy_prepare(self):
-        from src.chain.publisher import NFTPublisher
-        from src.utils.reporter import generate_html_report
-        from src.utils.visualizer import save_visual_assets
-        ip = self.state["ip"]
-        out = os.path.join(settings.OUTPUT_DIR, ip)
-        os.makedirs(out, exist_ok=True)
-        save_visual_assets(out, self.state.get("style", {}), self.state.get("assets", {}))
-        generate_html_report(ip, self.state.get("story", ""), self.state.get("script", ""), self.state.get("assets", {}), out)
-        pub = NFTPublisher(out)
-        pub.prepare_metadata(ip, self.state.get("story", ""), self.state.get("script", ""), self.state.get("assets", {}))
-        pub.generate_deploy_script()
-        self.log("DONE", "output/" + ip + "/ 目录已生成")
-
-    def _summary(self):
-        ip = self.state["ip"]
-        self.log("DONE", "")
-        self.log("DONE", "交付总结")
-        self.log("DONE", "目标IP: " + ip)
-        self.log("DONE", "")
-        self.log("DONE", "衍生故事: output/" + ip + "/story.html")
-        self.log("DONE", "动画脚本: output/" + ip + "/script.html")
-        self.log("DONE", "周边资产: output/" + ip + "/assets.html")
-        self.log("DONE", "SVG图形: output/" + ip + "/visuals/")
-        self.log("DONE", "NFT合约: output/" + ip + "/nft/IPWeaveNFT.sol")
-        self.log("DONE", "")
-        self.log("DONE", "链上交付: 合约部署到Sepolia测试网")
-        self.log("DONE", "验证: https://sepolia.etherscan.io/address/合约地址")
+    def _evaluate(self):
+        scores = self.state.get("data", {}).get("scores", {})
+        if scores:
+            all_pass = all(s.get("passed", False) for s in scores.values() if isinstance(s, dict))
+            self.log("EVAL", "质量评估: " + ("通过" if all_pass else "需改进"))
+        else:
+            self.log("EVAL", "暂无评分数据")
 
     def log(self, tag, msg):
-        line = "[" + tag + "] " + msg
-        logger.info(line)
+        logger.info("[" + tag + "] " + msg)
         self.history.append({"tag": tag, "msg": msg})
