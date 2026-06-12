@@ -1,8 +1,6 @@
 import os
 import json
-
-import json
-import importlib
+from src.config import settings
 from loguru import logger
 from src.utils.llm import glm
 from src.chain.reader import OnChainIPReader
