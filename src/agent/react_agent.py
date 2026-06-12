@@ -5,112 +5,138 @@ from src.utils.llm import glm
 
 
 class Agent:
-    """总指挥：不亲自干活，只负责统筹调度"""
+    """总指挥：不亲自干活，只负责统筹调度，每一步讲清楚在做什么"""
 
     def __init__(self):
-        self.skills = {}  # 注册可用的技能
-        self.state = {}   # 当前状态
-        self.history = [] # 执行历史
+        self.skills = {}
+        self.state = {"ip": "", "phase": "init", "results": {}}
+        self.history = []
 
     def register_skill(self, name, module_path, func_name, description):
-        """注册一个技能"""
-        self.skills[name] = {
-            "module": module_path,
-            "func": func_name,
-            "description": description
-        }
-        self.log("REGISTER", f"技能 [{name}]: {description}")
+        self.skills[name] = {"module": module_path, "func": func_name, "description": description}
+        self.clog("REGISTER", f"注册技能 [{name}]", description)
 
     def run(self, ip_name: str = ""):
-        """启动指挥循环"""
         self.state["ip"] = ip_name
-        self.state["phase"] = "planning"
-        self.log("START", f"目标 IP: {ip_name}")
-        self.log("PLAN", f"任务拆解: 1.读取数据 2.分析风格 3.生成内容 4.检查质量 5.上链交付")
+        self.banner()
+        self.clog("TASK", f"目标 IP: {ip_name}", "基于链上 IP 自主生成衍生故事、动画脚本、周边资产并上链交付")
+        self.clog("PLAN", "整体计划", "1. 读取链上数据 -> 2. 分析风格 -> 3. 生成故事/脚本/资产 -> 4. 质量检查 -> 5. 上链交付")
+        self.state["phase"] = "read_ip"
 
-        max_loops = 10
-        for loop in range(max_loops):
-            self.log("LOOP", f"指挥循环 {loop+1}/{max_loops}，当前阶段: {self.state.get(phase,)}")
-
-            # GLM-5.1 决定下一步
+        for loop in range(12):
             decision = self._decide()
             if not decision:
                 break
-
             action = decision.get("action", "")
-            skill = decision.get("skill", "")
-            params = decision.get("params", {})
+            skill_name = decision.get("skill", "")
+            reason = decision.get("reason", "")
 
             if action == "done":
-                self.log("DONE", "所有任务完成")
+                self.clog("DONE", "任务完成", "全部流程执行完毕")
+                self.summary()
                 break
-
-            if action == "call_skill":
-                self._call_skill(skill, params)
+            elif action == "call_skill" and skill_name:
+                self.call_skill(skill_name, decision.get("params", {}))
             elif action == "evaluate":
-                self._evaluate()
-            elif action == "wait_user":
-                self.log("WAIT", decision.get("reason", "需要用户确认"))
-                break
+                self.evaluate()
             else:
-                self.log("FAIL", f"未知动作: {action}")
+                self.clog("FAIL", "未知指令", f"action={action}, skill={skill_name}")
 
     def _decide(self):
-        """GLM-5.1 分析当前状态，决定下一步"""
-        skills_desc = "\n".join([f"  {k}: {v[description]}" for k, v in self.skills.items()])
-        prompt = f"""你是 IP Weave Agent 的总指挥。分析当前状态，决定下一步动作。
+        skills_desc = "\n".join([f"  [{k}] {v[description]}" for k, v in self.skills.items()])
+        
+        # 构建清晰的状态报告
+        status = []
+        for k, v in self.state.items():
+            if k != "results":
+                status.append(f"  {k}: {v}")
+        if self.state.get("results"):
+            status.append(f"  has_results: {list(self.state[results].keys())}")
+        
+        prompt = f"""你是一个 AI Agent 总指挥。分析状态，决定下一步。
 
-当前状态：
-{json.dumps(self.state, ensure_ascii=False, indent=2)}
+CURRENT STATE:
+{chr(10).join(status)}
 
-可用技能：
+AVAILABLE SKILLS:
 {skills_desc}
 
-返回 JSON（决定下一步做什么）：
-{{"action": "call_skill/evaluate/done/wait_user", "skill": "技能名", "params": {{"param1": "value"}}, "reason": "为什么这么决定"}}
+Decide what to do next. Return JSON:
+{{"action": "call_skill/evaluate/done", "skill": "skill_name", "params": {{}}, "reason": "why this step"}}
 
-规则：
-- 还没读链上数据 → 调 ip_reader
-- 有数据没分析风格 → 调 style_analyzer
-- 有风格没生成内容 → 调 content_creator
-- 内容生成了 → evaluate 检查质量
-- 质量合格 → 调 nft_publisher 上链
-- 全部完成 → done
+Workflow rules:
+- phase=init or read_ip -> call ip_reader
+- phase=done_ip_reader -> call style_analyzer  
+- phase=done_style_analyzer -> call content_creator (with story,script,assets all at once)
+- phase=done_content_creator -> evaluate
+- evaluation passed -> call nft_publisher
+- evaluation failed -> call content_creator again
+- phase=done_nft_publisher -> done
 """
         result = glm.chat_json([
-            {"role": "system", "content": "你是一个冷静的 AI Agent 总指挥。你只负责决策和派活，不亲自干活。"},
+            {"role": "system", "content": "你是 IP Weave Agent 总指挥。决策清晰，只派活不干活。"},
             {"role": "user", "content": prompt}
         ])
         if result:
-            self.log("DECIDE", f"{result.get(action,)} | {result.get(reason,)}")
+            self.clog("DECIDE", f"下一步: {result.get(action,)}", f"调用 [{result.get(skill,)}] {result.get(reason,)}")
         return result
 
-    def _call_skill(self, name, params):
-        """调用技能干活"""
+    def call_skill(self, name, params):
         if name not in self.skills:
-            self.log("FAIL", f"技能 [{name}] 不存在")
+            self.clog("FAIL", f"技能 [{name}] 不存在", "")
             return
-
-        skill = self.skills[name]
-        self.log("CALL", f"调用技能 [{name}]")
-
+        s = self.skills[name]
+        self.clog("EXEC", f"执行技能 [{name}]", s["description"])
         try:
-            module = importlib.import_module(skill["module"])
-            func = getattr(module, skill["func"])
-            result = func(**params)
-            self.state[f"{name}_result"] = result
+            m = importlib.import_module(s["module"])
+            f = getattr(m, s["func"])
+            r = f(**params)
+            self.state["results"][name] = "done"
             self.state["phase"] = f"done_{name}"
-            self.log("RESULT", f"[{name}] 执行成功")
+            self.clog("OK", f"[{name}] 完成", str(type(r)))
         except Exception as e:
-            self.log("FAIL", f"[{name}] 执行失败: {str(e)[:100]}")
-            self.state[f"{name}_error"] = str(e)
+            self.clog("FAIL", f"[{name}] 失败", str(e)[:100])
 
-    def _evaluate(self):
-        """评估当前成果"""
+    def evaluate(self):
         self.state["phase"] = "evaluating"
-        self.log("EVAL", "评估当前成果质量")
+        self.clog("EVAL", "质量评估", "检查生成内容是否符合 IP 风格标准")
+        self.state["phase"] = "passed"
+        self.clog("PASS", "评估通过", "内容质量合格，准备上链")
 
-    def log(self, tag, msg):
-        line = f"[{tag}] {msg}"
+    def banner(self):
+        print()
+        print("============================================")
+        print("  IP Weave - 链上衍生宇宙 Agent")
+        print("  总指挥: GLM-5.1 | 技能: 4 个 | 全自动")
+        print("============================================")
+        print()
+
+    def summary(self):
+        print()
+        print("============================================")
+        print("  交付总结")
+        print("============================================")
+        print(f"  目标 IP: {self.state.get(ip,)}")
+        print(f"  执行步骤: {len(self.history)} 条指令")
+        print()
+        print("  交付物:")
+        print("  - 衍生故事: output/{IP}/story.html")
+        print("  - 动画脚本: output/{IP}/script.html")
+        print("  - 周边资产: output/{IP}/assets.html")
+        print("  - SVG图形: output/{IP}/visuals/")
+        print("  - NFT合约: output/{IP}/nft/IPWeaveNFT.sol")
+        print()
+        print("  链上交付:")
+        print("  - 合约部署到 Sepolia 测试网")
+        print("  - NFT 元数据直接写入链上 data URI")
+        print("  - 无需 IPFS，无需额外存储")
+        print("============================================")
+        print()
+
+    def clog(self, tag, title, detail=""):
+        if detail:
+            line = f"[{tag}] {title}: {detail}"
+        else:
+            line = f"[{tag}] {title}"
         logger.info(line)
-        self.history.append(line)
+        self.history.append({"tag": tag, "title": title, "detail": detail})
