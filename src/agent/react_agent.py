@@ -101,4 +101,4 @@ class Agent:
     def log(self, tag, msg):
         line = "[" + tag + "] " + msg
         logger.info(line)
-        self.history.append({"tag": tag, "msg": msg}}
+        self.history.append({"tag": tag, "msg": msg})
