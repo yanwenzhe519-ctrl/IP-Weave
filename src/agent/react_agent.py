@@ -1,89 +1,116 @@
 import json
-import os
+import importlib
 from loguru import logger
-from src.config import settings
 from src.utils.llm import glm
 
 
-class ReActAgent:
-    """真正的自主 Agent：GLM-5.1 自己决定做什么、怎么做、用什么工具"""
+class Agent:
+    """总指挥：不亲自干活，只负责统筹调度"""
 
     def __init__(self):
-        self.logs = []
-        self.chain_data = None
-        self.results = {}
+        self.skills = {}  # 注册可用的技能
+        self.state = {}   # 当前状态
+        self.history = [] # 执行历史
 
-    def run(self, ip_name: str = "", contract: str = ""):
-        self.contract = contract
-        self.ip_name = ip_name
-        target = contract if contract else ip_name
-        self.log("AGENT", f"目标: {target}")
-        self.log("AGENT", f"任务: 基于链上 IP 生成衍生故事、动画脚本、周边资产并上链")
+    def register_skill(self, name, module_path, func_name, description):
+        """注册一个技能"""
+        self.skills[name] = {
+            "module": module_path,
+            "func": func_name,
+            "description": description
+        }
+        self.log("REGISTER", f"技能 [{name}]: {description}")
 
-        # 让 GLM-5.1 自主规划和执行
-        prompt = f"""你是一个全能的 AI Agent，可以执行任何 Python 代码来完成用户的任务。
+    def run(self, ip_name: str = ""):
+        """启动指挥循环"""
+        self.state["ip"] = ip_name
+        self.state["phase"] = "planning"
+        self.log("START", f"目标 IP: {ip_name}")
+        self.log("PLAN", f"任务拆解: 1.读取数据 2.分析风格 3.生成内容 4.检查质量 5.上链交付")
 
-用户任务：基于链上 IP "{target}"，生成衍生故事、动画脚本、周边资产，并部署上链。
+        max_loops = 10
+        for loop in range(max_loops):
+            self.log("LOOP", f"指挥循环 {loop+1}/{max_loops}，当前阶段: {self.state.get(phase,)}")
 
-你可以使用以下工具：
-1. 读取链上数据
-2. 分析 IP 风格
-3. 调用 GLM-5.1 生成文本
-4. 生成图片
-5. 部署合约到 Sepolia
-6. 创建和写入文件
+            # GLM-5.1 决定下一步
+            decision = self._decide()
+            if not decision:
+                break
 
-请按以下格式思考和执行：
-THOUGHT: 分析当前状态和下一步做什么
-ACTION: python代码
-OBSERVATION: 执行结果
+            action = decision.get("action", "")
+            skill = decision.get("skill", "")
+            params = decision.get("params", {})
 
-每次只执行一个动作，完成后告诉我结果，然后决定下一步。
+            if action == "done":
+                self.log("DONE", "所有任务完成")
+                break
 
-首先，读取链上 IP "{target}" 的数据。"""
+            if action == "call_skill":
+                self._call_skill(skill, params)
+            elif action == "evaluate":
+                self._evaluate()
+            elif action == "wait_user":
+                self.log("WAIT", decision.get("reason", "需要用户确认"))
+                break
+            else:
+                self.log("FAIL", f"未知动作: {action}")
 
-        messages = [
-            {"role": "system", "content": "你是一个自主 AI Agent。你可以执行 Python 代码来完成复杂任务。每次只做一件事，做完告诉我结果，然后继续下一步。"},
+    def _decide(self):
+        """GLM-5.1 分析当前状态，决定下一步"""
+        skills_desc = "\n".join([f"  {k}: {v[description]}" for k, v in self.skills.items()])
+        prompt = f"""你是 IP Weave Agent 的总指挥。分析当前状态，决定下一步动作。
+
+当前状态：
+{json.dumps(self.state, ensure_ascii=False, indent=2)}
+
+可用技能：
+{skills_desc}
+
+返回 JSON（决定下一步做什么）：
+{{"action": "call_skill/evaluate/done/wait_user", "skill": "技能名", "params": {{"param1": "value"}}, "reason": "为什么这么决定"}}
+
+规则：
+- 还没读链上数据 → 调 ip_reader
+- 有数据没分析风格 → 调 style_analyzer
+- 有风格没生成内容 → 调 content_creator
+- 内容生成了 → evaluate 检查质量
+- 质量合格 → 调 nft_publisher 上链
+- 全部完成 → done
+"""
+        result = glm.chat_json([
+            {"role": "system", "content": "你是一个冷静的 AI Agent 总指挥。你只负责决策和派活，不亲自干活。"},
             {"role": "user", "content": prompt}
-        ]
+        ])
+        if result:
+            self.log("DECIDE", f"{result.get(action,)} | {result.get(reason,)}")
+        return result
 
-        max_rounds = 20
-        for r in range(max_rounds):
-            self.log("STEP", f"轮次 {r+1}/{max_rounds}")
-            resp = glm.chat(messages, max_tokens=4096, temperature=0.3)
-            if not resp:
-                self.log("FAIL", "GLM-5.1 无响应")
-                break
-            self.log("THINK", resp[:200])
-            messages.append({"role": "assistant", "content": resp})
+    def _call_skill(self, name, params):
+        """调用技能干活"""
+        if name not in self.skills:
+            self.log("FAIL", f"技能 [{name}] 不存在")
+            return
 
-            # 检查是否完成
-            if "DONE" in resp or "完成" in resp:
-                self.log("DONE", "Agent 自主完成")
-                break
+        skill = self.skills[name]
+        self.log("CALL", f"调用技能 [{name}]")
 
-            # 如果有 PYTHON 代码块则执行
-            import re
-            code_blocks = re.findall(r"```python\n(.*?)```", resp, re.DOTALL)
-            for code in code_blocks:
-                try:
-                    exec(code, globals())
-                    self.log("EXEC", "代码执行成功")
-                except Exception as e:
-                    self.log("EXEC", f"执行错误: {str(e)[:100]}")
-                    messages.append({"role": "user", "content": f"执行出错: {str(e)[:200]}"})
-            
-            # 如果有 SHELL 代码块则执行
-            shell_blocks = re.findall(r"```(?:bash|shell)\n(.*?)```", resp, re.DOTALL)
-            import subprocess
-            for code in shell_blocks:
-                try:
-                    result = subprocess.run(code, shell=True, capture_output=True, text=True, timeout=30)
-                    self.log("SHELL", result.stdout[:200] if result.stdout else result.stderr[:200])
-                except Exception as e:
-                    self.log("SHELL", f"失败: {str(e)[:100]}")
+        try:
+            module = importlib.import_module(skill["module"])
+            func = getattr(module, skill["func"])
+            result = func(**params)
+            self.state[f"{name}_result"] = result
+            self.state["phase"] = f"done_{name}"
+            self.log("RESULT", f"[{name}] 执行成功")
+        except Exception as e:
+            self.log("FAIL", f"[{name}] 执行失败: {str(e)[:100]}")
+            self.state[f"{name}_error"] = str(e)
+
+    def _evaluate(self):
+        """评估当前成果"""
+        self.state["phase"] = "evaluating"
+        self.log("EVAL", "评估当前成果质量")
 
     def log(self, tag, msg):
         line = f"[{tag}] {msg}"
         logger.info(line)
-        self.logs.append(line)
+        self.history.append(line)
