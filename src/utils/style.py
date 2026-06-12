@@ -1,5 +1,3 @@
-"""风格分析 + 一致性检查 — GLM-5.1 驱动"""
-
 import json
 from loguru import logger
 from src.utils.llm import glm
@@ -7,42 +5,33 @@ from src.utils.llm import glm
 
 class StyleAnalyzer:
     def extract(self, chain_data: dict) -> dict:
-        logger.info("→ [GLM-5.1] 提取 IP 风格指纹...")
-        prompt = f"""分析以下链上 IP，结合你对这个 IP 的了解，提取真实的风格特征，返回 JSON。
+        logger.info("-> [GLM-5.1] 提取 IP 风格指纹...")
+        prompt = f"""你是一个 IP 文化研究员。分析这个链上 IP 的独特之处。
 
-链上数据：{json.dumps(chain_data, ensure_ascii=False, indent=2)}
+链上数据：
+{json.dumps(chain_data, ensure_ascii=False, indent=2)}
 
-要求：
-- 结合你对该 IP 的了解，不要泛泛而谈
-- 美术风格要具体（比如"粗线条美式地下漫画"不是"数字插画"）
-- 角色设计要抓住真正特征
-- 叙事基调要符合该 IP 的真实气质
-- 如果是知名 IP（如 Pepe、BAYC），基于真实背景分析
+要求：不要泛泛而谈。基于你对这个 IP 的真实了解，提取它独有的特征。
 
-JSON 格式：
-{{
-  "visual": {{"palette": ["主色"], "art_style": "美术风格", "character_design": "设计特点"}},
-  "narrative": {{"tone": "基调", "genre": "类型", "setting": "世界观", "core_theme": "核心主题"}},
-  "vibe": ["氛围词"],
-  "character_archetype": "角色原型",
-  "tone_tags": ["语气标签"],
-  "background": "这个 IP 的真实背景和故事"
-}}"""
+返回 JSON（必须包含以下所有字段）：
+- name: IP 的名称
+- lore: 这个 IP 的世界观背景故事和核心设定（详细）
+- character: 角色性格特点和独特习惯
+- visual: {{"palette":["主色1","主色2"],"art_style":"美术风格","character_design":"角色设计特点"}}
+- narrative: {{"tone":"叙事基调","genre":"类型","setting":"世界观设定","core_theme":"核心主题"}}
+- vibe: ["独特氛围词1","氛围词2","氛围词3"]
+- key_symbols: ["代表符号1","符号2","符号3"]
+- cultural_reference: "文化背景和灵感来源"
+- character_archetype: "角色原型"
+"""
         result = glm.chat_json([
-            {"role": "system", "content": "你是专业的 IP 风格分析师。你对所有知名链上 IP 的背景、美术风格、叙事特征有深入了解。"},
+            {"role": "system", "content": "你是 IP 文化研究员，对所有知名 NFT 项目的背景、 lore、文化意义有深入了解。你的分析具体、深入、不泛泛而谈。"},
             {"role": "user", "content": prompt}
         ])
         if result:
-            logger.success(f"  风格: {result.get('narrative', {}).get('tone', '')}")
+            logger.success(f"  IP: {result.get(name,)}")
             return result
-        return {
-            "visual": {"palette": ["蛙绿", "暗夜紫", "金色"], "art_style": "数字插画 / Meme 风格",
-                       "character_design": "绿色青蛙·标志性表情·跨次元"},
-            "narrative": {"tone": "荒诞又深刻", "genre": "Meme 传奇 / 互联网民俗",
-                          "setting": "数字宇宙与现实世界的夹缝", "core_theme": "一个表情如何改变世界"},
-            "vibe": ["魔性", "怀旧", "反叛", "幽默"], "character_archetype": "互联网图腾",
-            "tone_tags": ["戏谑", "诗意", "疯狂", "温暖"]
-        }
+        return {"name":"Unknown","lore":"","character":"","visual":{},"narrative":{},"vibe":[],"key_symbols":[],"cultural_reference":"","character_archetype":""}
 
 
 class StyleChecker:
@@ -50,21 +39,25 @@ class StyleChecker:
         self.profile = profile
 
     def check(self, content: str, content_type: str) -> dict:
-        logger.info(f"  → [GLM-5.1] 检查 {content_type} 风格一致性...")
-        prompt = f"""判断内容是否与 IP 风格画像一致。
+        logger.info(f"  -> [GLM-5.1] 检查 {content_type} 风格一致性...")
+        prompt = f"""评估内容与 IP 风格的一致性。
 
-风格画像：{json.dumps(self.profile, ensure_ascii=False, indent=2)}
+IP 风格：
+{json.dumps(self.profile, ensure_ascii=False, indent=2)}
+
 内容类型：{content_type}
 内容：{content[:2000]}
 
+严格评分。7 分以上通过。
+
 返回 JSON：{{"score": 0-10, "issues": [], "suggestions": []}}
-7 分以下不通过。"""
+"""
         result = glm.chat_json([
-            {"role": "system", "content": "你是严格的 IP 风格审查员。"},
+            {"role": "system", "content": "你是严格的 IP 风格审查员。评估内容是否真正反映了这个 IP 的独特气质。"},
             {"role": "user", "content": prompt}
         ])
         if result:
             result["passed"] = result.get("score", 0) >= 7.0
-            logger.info(f"    评分: {result.get('score', 0)}/10 {'OK' if result.get('passed') else 'FAIL'}")
+            logger.info(f"    评分: {result.get(score,0)}/10 {OK if result.get(passed) else FAIL}")
             return result
-        return {"score": 8.0, "passed": True, "issues": [], "suggestions": []}
+        return {"score":8.0,"passed":True,"issues":[],"suggestions":[]}
