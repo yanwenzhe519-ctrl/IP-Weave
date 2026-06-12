@@ -58,6 +58,6 @@ IP 风格：
         ])
         if result:
             result["passed"] = result.get("score", 0) >= 7.0
-            logger.info(f"    评分: {result.get('score',0)}/10 {OK if result.get('passed') else 'FAIL'}")
+            logger.info(f"    评分: {result.get('score',0)}/10 {'OK' if result.get('passed') else 'FAIL'}")
             return result
         return {"score":8.0,"passed":True,"issues":[],"suggestions":[]}
