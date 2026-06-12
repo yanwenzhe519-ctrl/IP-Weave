@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-import json, os, base64, httpx, re
+import json, os, base64, httpx, re, sys
+from dotenv import load_dotenv
 from datetime import datetime
 
 DESKTOP = os.path.join(os.path.expanduser("~"), "Desktop")
-API_KEY = "8d8ffff0a0d1467991a089cdc58d799d.9GhcEVtLT1nPYsyf"
+from dotenv import load_dotenv
+load_dotenv()
+API_KEY = os.environ.get("ZHIPUAI_API_KEY", "")
 API_URL = "https://api.z.ai/api/coding/paas/v4/chat/completions"
 
 def glm(msg, system="", json_mode=False):
