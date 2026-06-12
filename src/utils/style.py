@@ -29,7 +29,7 @@ class StyleAnalyzer:
             {"role": "user", "content": prompt}
         ])
         if result:
-            logger.success(f"  IP: {result.get(name,)}")
+            logger.success(f"  IP: {result.get('name','')}")
             return result
         return {"name":"Unknown","lore":"","character":"","visual":{},"narrative":{},"vibe":[],"key_symbols":[],"cultural_reference":"","character_archetype":""}
 
