@@ -30,7 +30,7 @@ IP 世界观：{profile.get("lore","")}
 
 直接写故事，不要分析。"""
         return glm.chat([
-            {"role": "system", "content": f"你是擅长为{profile.get('name',IP)}创作衍生故事的作家。你深入了解这个 IP 的世界观、角色性格和文化背景。"},
+            {"role": "system", "content": f"你是擅长为{profile.get('name','IP')}创作衍生故事的作家。你深入了解这个 IP 的世界观、角色性格和文化背景。"},
             {"role": "user", "content": prompt}
         ]) or "# 生成失败"
 
@@ -53,7 +53,7 @@ IP：{profile.get("name","")}
 3. 融入 IP 特有的视觉元素
 4. 可用 markdown 表格"""
         return glm.chat([
-            {"role": "system", "content": f"你是资深动画导演，擅长将{profile.get('name',IP)}的视觉风格转化为动画分镜。"},
+            {"role": "system", "content": f"你是资深动画导演，擅长将{profile.get('name','IP')}的视觉风格转化为动画分镜。"},
             {"role": "user", "content": prompt}
         ]) or "# 生成失败"
 
@@ -77,7 +77,7 @@ IP 名称：{profile.get("name","")}
   {{"name":"","type":"","description":"设计描述","concept":"设计理念","metadata":{{"name":"","description":"","attributes":[]}},"image_prompt":"英文出图提示词"}}
 ]}}"""
         result = glm.chat_json([
-            {"role": "system", "content": f"你是 Web3 产品设计师，擅长将{profile.get('name',IP)}的文化符号转化为可上链的数字资产。"},
+            {"role": "system", "content": f"你是 Web3 产品设计师，擅长将{profile.get('name','IP')}的文化符号转化为可上链的数字资产。"},
             {"role": "user", "content": prompt}
         ])
         if result and "assets" in result:
