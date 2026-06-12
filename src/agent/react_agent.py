@@ -43,7 +43,7 @@ class Agent:
                 self.clog("FAIL", "未知指令", f"action={action}, skill={skill_name}")
 
     def _decide(self):
-        skills_desc = "\n".join([f"  [{k}] {v[description]}" for k, v in self.skills.items()])
+        skills_desc = "\n".join([f"  [{k}] {v["description"]}" for k, v in self.skills.items()])
         
         # 构建清晰的状态报告
         status = []
