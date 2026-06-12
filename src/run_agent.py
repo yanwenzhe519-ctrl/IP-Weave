@@ -20,13 +20,8 @@ def main():
         print("GLM-5.1 连接失败")
         return
     agent = Agent()
-    agent.register_skill("ip_reader", "src.skills.ip_reader", "read_ip", "读取链上IP数据", "ip_name: IP名称")
-    agent.register_skill("style_analyzer", "src.skills.style_analyzer", "analyze_style", "分析IP风格", "chain_data: 链上数据")
-    agent.register_skill("story_writer", "src.skills.story_writer", "write_story", "创作衍生故事", "style_profile: 风格画像, plan: 计划")
-    agent.register_skill("script_writer", "src.skills.script_writer", "write_script", "生成动画分镜", "story: 故事文本, style_profile: 风格")
-    agent.register_skill("asset_designer", "src.skills.asset_designer", "design_assets", "设计周边资产", "style_profile: 风格")
-    agent.register_skill("quality_checker", "src.skills.quality_checker", "check_quality", "检查风格一致性", "style_profile,story,script,assets")
     agent.run(ip_name=target)
+    print("完成")
 
 if __name__ == "__main__":
     main()
