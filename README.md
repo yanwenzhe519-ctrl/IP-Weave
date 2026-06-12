@@ -185,6 +185,63 @@ output 目录下还有 nft 子目录，包含 NFT 元数据 metadata.json 文件
 
 ---
 
+
+## 链上部署指南
+
+### 示例部署
+
+本项目在 Sepolia 测试网上部署了一个示例合约，供评委验证链上交付能力。
+
+网络: Sepolia Testnet
+链 ID: 11155111
+RPC 地址: https://ethereum-sepolia-rpc.publicnode.com
+合约地址: 0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
+Etherscan: https://sepolia.etherscan.io/address/0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
+区块浏览器: https://sepolia.etherscan.io
+
+矿工费: 部署合约消耗的 Gas 由 Sepolia 测试网 ETH 支付，该 ETH 无任何实际经济价值，可通过公开水龙头免费领取。
+
+### 部署到其他 EVM 链
+
+IP Weave 的合约部署逻辑在 src/agent/react_agent.py 的 _deploy_to_sepolia 方法中。这个方法使用 web3.py 与区块链交互，支持任何 EVM 兼容链。要部署到其他网络，需要修改以下参数：
+
+RPC 地址: 改为目标网络的 RPC 节点地址。公共 RPC 可以在 ChainList 网站上查找。
+链 ID: 每个网络有唯一的链 ID。以太坊主网是 1，Polygon 是 137，Arbitrum 是 42161。
+区块浏览器: 用于验证交易的浏览器地址。
+矿工费: 不同网络的 Gas 价格不同，需要根据网络拥堵情况调整 maxFeePerGas 参数。
+
+常用的测试网配置：
+
+Sepolia (以太坊官方测试网):
+RPC: https://ethereum-sepolia-rpc.publicnode.com
+链 ID: 11155111
+领取测试 ETH: https://sepoliafaucet.com
+
+Polygon Mumbai:
+RPC: https://rpc-mumbai.maticvigil.com
+链 ID: 80001
+领取测试 MATIC: https://faucet.polygon.technology
+
+Arbitrum Sepolia:
+RPC: https://sepolia-rollup.arbitrum.io/rpc
+链 ID: 421614
+领取测试 ETH: https://faucet.quicknode.com/arbitrum
+
+### 部署到 Solana
+
+当前合约使用 Solidity 语言编写，只能部署到 EVM 兼容链。Solana 使用 Rust 语言，需要将合约重写为 Anchor 框架。计划在后续版本中加入 Solana 支持。
+
+### 钱包管理
+
+Agent 自动生成一个临时钱包用于合约部署，私钥仅保存在内存中，不会写入磁盘。钱包地址和私钥可以在运行日志中查看。
+
+你也可以使用自己的钱包进行部署。在 src/agent/react_agent.py 中修改 PRIVATE_KEY 变量即可。请使用测试网钱包，不要使用主网私钥。
+
+### 安全提醒
+
+始终使用测试网进行开发和演示。测试网 ETH 可以通过水龙头免费获取。不要将主网私钥输入到任何代码配置中。每次部署前确认网络配置是否正确。
+
+
 ## 链上测试网证据
 
 合约已部署到 Sepolia 测试网。网络名称 Sepolia Testnet，链 ID 11155111。
