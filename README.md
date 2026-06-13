@@ -175,7 +175,9 @@ nft 子目录包含 NFT 元数据和 Solidity 合约代码。
 
 ## 长程任务运行记录
 
-Agent 每次执行后会自动生成运行记录，保存在 output/IP名称/run_record.json 中。
+Agent 每次执行后会自动生成运行记录。
+
+示例记录（Azuki 运行）：[docs/run_record_azuki.json](https://github.com/yanwenzhe519-ctrl/IP-Weave/blob/master/docs/run_record_azuki.json)，保存在 output/IP名称/run_record.json 中。
 
 记录内容包含任务信息、步骤拆解、工具调用时间线和交付结果。通过这些记录，评审可以完整追溯 Agent 的任务拆解过程、每一步的工具选择、执行顺序和最终交付成果。
 
