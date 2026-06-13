@@ -116,6 +116,7 @@ cd IP-Weave
 
 第三步安装依赖：
 pip install -r requirements.txt
+pip install build123d
 
 第四步创建配置文件：
 cp .env.example .env
@@ -136,6 +137,7 @@ cd IP-Weave
 
 第三步：
 pip install -r requirements.txt
+pip install build123d
 
 第四步：
 notepad .env
