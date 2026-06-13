@@ -142,10 +142,58 @@ class Agent:
                 if self.state.get("script"): results["script"] = checker.check(self.state["script"],"脚本")
                 if self.state.get("assets"): results["assets"] = checker.check(json.dumps(self.state["assets"],ensure_ascii=False),"资产")
                 self.state["scores"] = results; return True
+            elif action == "deploy_chain":
+                return self._deploy_to_sepolia()
             elif action == "deliver":
                 self._deliver(); return True
         except Exception as e:
             logger.info("[ERROR] " + str(e)[:80]); return False
+
+
+    def _deploy_to_sepolia(self):
+        logger.info("[CHAIN] 部署到 Sepolia...")
+        try:
+            from web3 import Web3
+            from eth_account import Account
+            from solcx import install_solc, set_solc_version, compile_source
+            import base64 as _b
+            KEY = "2efd25ac95a66421e4116bf8d9125c78eca43a613f44c16dbbacbd82c046d2b3"
+            w3 = Web3(Web3.HTTPProvider("https://ethereum-sepolia-rpc.publicnode.com"))
+            acct = Account.from_key(KEY)
+            bal = w3.eth.get_balance(acct.address)
+            logger.info(f"[CHAIN] 余额: {w3.from_wei(bal, 'ether')} ETH")
+            if bal < w3.to_wei(0.003, "ether"):
+                logger.info("[CHAIN] 余额不足"); return False
+            install_solc("0.8.20"); set_solc_version("0.8.20")
+            src = 'pragma solidity ^0.8.20; contract IPWeaveNFT { string public name = "IP Weave"; string public symbol = "IPW"; mapping(uint256 => address) private _owners; mapping(uint256 => string) private _uris; uint256 private _total; address public owner; event Transfer(address indexed, address indexed, address indexed); constructor() { owner = msg.sender; } function mint(address to, string memory uri) public returns (uint256) { require(msg.sender == owner); _total++; _owners[_total] = to; _uris[_total] = uri; emit Transfer(address(0), to, _total); return _total; } function ownerOf(uint256 id) public view returns (address) { return _owners[id]; } function tokenURI(uint256 id) public view returns (string memory) { return _uris[id]; } }'
+            cd = compile_source(src, output_values=["abi", "bin"])
+            cv = list(cd.values())[0]
+            abi, bc = cv["abi"], "0x" + cv["bin"]
+            ct = w3.eth.contract(abi=abi, bytecode=bc)
+            n = w3.eth.get_transaction_count(acct.address)
+            try: ge = ct.constructor().estimate_gas({"from": acct.address})
+            except: ge = 500000
+            tx = ct.constructor().build_transaction({"from": acct.address, "nonce": n, "gas": int(ge*1.2)+50000, "maxFeePerGas": w3.to_wei(5, "gwei"), "maxPriorityFeePerGas": w3.to_wei(1, "gwei"), "chainId": 11155111})
+            sg = acct.sign_transaction(tx); th = w3.eth.send_raw_transaction(sg.raw_transaction)
+            rc = w3.eth.wait_for_transaction_receipt(th, timeout=180)
+            if rc["status"] == 1:
+                addr = rc["contractAddress"]
+                logger.info(f"[CHAIN] 合约: {addr}")
+                logger.info(f"[CHAIN] https://sepolia.etherscan.io/address/{addr}")
+                txt = (self.state.get("story","") or "")[:300]
+                meta = {"name": f"IP Weave - {self.state.get('ip','')}", "description": txt, "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzBhMGEwZiIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iODAiIGZpbGw9IiM0YWRlODAiIG9wYWNpdHk9IjAuMyIvPjx0ZXh0IHg9IjIwMCIgeT0iMjEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjIwIj5JUCBXZWF2ZTwvdGV4dD48L3N2Zz4=", "attributes": [{"trait_type": "IP", "value": self.state.get("ip","")}, {"trait_type": "Generator", "value": "GLM-5.1"}]}
+                import json as _j
+                mu = "data:application/json;base64," + _b.b64encode(_j.dumps(meta, ensure_ascii=False).encode()).decode()
+                c2 = w3.eth.contract(address=addr, abi=abi)
+                n2 = w3.eth.get_transaction_count(acct.address)
+                mt = c2.functions.mint(acct.address, mu).build_transaction({"from": acct.address, "nonce": n2, "gas": 200000, "maxFeePerGas": w3.to_wei(5, "gwei"), "maxPriorityFeePerGas": w3.to_wei(1, "gwei"), "chainId": 11155111})
+                s2 = acct.sign_transaction(mt); h2 = w3.eth.send_raw_transaction(s2.raw_transaction)
+                w3.eth.wait_for_transaction_receipt(h2, timeout=60)
+                logger.info(f"[CHAIN] NFT已铸造! https://sepolia.etherscan.io/tx/0x{h2.hex()}")
+                return True
+        except Exception as e:
+            logger.info(f"[CHAIN] 错误: {str(e)[:80]}")
+        return False
 
     def _deliver(self):
         from src.chain.publisher import NFTPublisher
@@ -164,4 +212,6 @@ class Agent:
         with open(record_path, "w", encoding="utf-8") as _f:
             _json.dump(self.run_record, _f, ensure_ascii=False, indent=2)
         logger.info("[DONE] 交付: output/" + ip + "/")
+        # 自动上链
+        self._deploy_to_sepolia()
         logger.info("[DONE] 运行记录: " + record_path)
