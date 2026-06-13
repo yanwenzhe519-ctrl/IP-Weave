@@ -217,9 +217,14 @@ Arbitrum Sepolia: RPC https://sepolia-rollup.arbitrum.io/rpc，链 ID 421614
 
 Agent 自动生成临时部署钱包，私钥仅在内存中使用。用户也可在代码中设置自己的测试网钱包私钥。请始终使用测试网，不要使用主网私钥。## 链上测试网证据
 
-Agent 每次部署后会在终端打印合约地址，可在 Etherscan 上查看。
+本项目在 Sepolia 测试网上部署了示例合约，供评委验证链上交付能力。
 
-查看方式：运行 Agent 后在终端查看打印的合约地址。打开 https://sepolia.etherscan.io 输入合约地址查看合约代码和交易记录。output 目录的 nft 子目录中包含合约源码。
+示例合约地址: 0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
+Etherscan: https://sepolia.etherscan.io/address/0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
+网络: Sepolia Testnet（链 ID 11155111）
+
+用户部署自己的合约：
+Agent 每次运行后会在终端打印合约地址。打开 Etherscan 输入合约地址即可查看。output 目录的 nft 子目录中包含合约源码。
 
 部署钱包由 Agent 自动生成，Sepolia ETH 通过公开水龙头获取，无实际经济价值。## 安全与合规
 
