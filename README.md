@@ -146,9 +146,23 @@ httpx 是 HTTP 客户端库，用于调用外部 API。
 
 第四步配置 API Key：在项目目录创建 .env 文件，写入 ZHIPUAI_API_KEY=你的Key
 
-第五步运行 Agent：echo azuki | python src/run_agent.py
+第五步设置环境变量（Windows cmd）：
+set PYTHONPATH=%CD%
 
-支持的 IP 名称：pepe、bayc、punk、azuki。也支持直接输入任意 ERC-721 合约地址。
+第六步运行 Agent：
+echo pepe | python src/run_agent.py
+
+Windows cmd 完整命令：
+cd IP-Weave
+set PYTHONPATH=%%CD%%
+echo pepe | python src\run_agent.py
+
+Git Bash 完整命令：
+cd /c/Users/lenovo/Desktop/IP-Weave
+export PYTHONPATH=$(pwd)
+echo "pepe" | python src/run_agent.py
+
+支持的 IP：pepe、bayc、punk、azuki。也支持直接输入 ERC-721 合约地址。
 
 ---
 
