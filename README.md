@@ -162,7 +162,7 @@ cd /c/Users/lenovo/Desktop/IP-Weave
 export PYTHONPATH=$(pwd)
 echo "azuki" | python src/run_agent.py
 
-支持的 IP：pepe、bayc、punk、azuki。也支持直接输入 ERC-721 合约地址。
+支持的 IP：pepe、bayc、punk、azuki等，也支持直接输入 ERC-721 合约地址。
 
 ---
 
