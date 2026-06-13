@@ -142,7 +142,7 @@ httpx 是 HTTP 客户端库，用于调用外部 API。
 第二步进入目录：cd IP-Weave
 
 
-第三步安装依赖：pip install -r requirements.txt 然后 pip install build123d
+第三步安装依赖：pip install -r requirements.txt
 
 第四步配置 API Key：在项目目录创建 .env 文件，写入 ZHIPUAI_API_KEY=你的Key
 
@@ -154,13 +154,13 @@ echo 链上IP | python src/run_agent.py
 
 Windows cmd 完整命令：
 cd IP-Weave
-set PYTHONPATH=%%CD%%
+set PYTHONPATH=%CD%
 echo “输入链上IP” | python src\run_agent.py
 
 Git Bash 完整命令：
 cd /c/Users/lenovo/Desktop/IP-Weave
 export PYTHONPATH=$(pwd)
-echo "输入链上IP" | python src/run_agent.py
+echo "azuki" | python src/run_agent.py
 
 支持的 IP：pepe、bayc、punk、azuki。也支持直接输入 ERC-721 合约地址。
 
