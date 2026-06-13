@@ -10,6 +10,7 @@ from src.content.generators import StoryGenerator, ScriptGenerator, AssetDesigne
 class Agent:
     def __init__(self):
         self.state = {"ip": "", "data": None, "style": None, "story": "", "script": "", "assets": {}, "scores": {}, "plan": []}
+        self.run_record = {"task": "", "steps": [], "iterations": 0, "tools_called": [], "delivery": ""}
         self.tools = [
             {"name": "read_ip", "desc": "从以太坊主网读取指定IP的链上数据"},
             {"name": "analyze_style", "desc": "用GLM-5.1分析IP的风格指纹和文化背景"},
@@ -25,6 +26,7 @@ class Agent:
         self.state["ip"] = ip_name
         logger.info("[AGENT] 目标IP: " + ip_name)
         logger.info("[AGENT] 任务: 基于链上IP生成衍生故事/动画脚本/周边资产/3D模型并上链")
+        self.run_record["task"] = f"为 {ip_name} 生成衍生故事/动画脚本/周边资产并上链"
 
         # 第一步: GLM-5.1 拆解任务
         logger.info("[PLAN] 任务拆解中...")
@@ -39,6 +41,7 @@ class Agent:
 
         self.state["plan"] = plan_steps
         logger.info("[PLAN] 执行计划: " + " -> ".join(plan_steps))
+        self.run_record["steps"] = [{"step": s, "status": "pending"} for s in plan_steps]
 
         # 第二步: 按计划执行
         completed = set()
@@ -155,4 +158,10 @@ class Agent:
         pub = NFTPublisher(out)
         pub.prepare_metadata(ip, self.state.get("story",""), self.state.get("script",""), self.state.get("assets",{}))
         pub.generate_deploy_script()
+        self.run_record["delivery"] = f"output/{ip}/"
+        import json as _json
+        record_path = os.path.join(out, "run_record.json")
+        with open(record_path, "w", encoding="utf-8") as _f:
+            _json.dump(self.run_record, _f, ensure_ascii=False, indent=2)
         logger.info("[DONE] 交付: output/" + ip + "/")
+        logger.info("[DONE] 运行记录: " + record_path)
