@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP Weave - 链上衍生宇宙</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+.container{max-width:800px;margin:0 auto;padding:60px 24px 120px}
+
+/* 头部 */
+.hero{text-align:center;padding:80px 0 60px;border-bottom:1px solid #1a1a2e;margin-bottom:60px}
+.logo{font-size:3em;margin-bottom:16px;display:block}
+h1{font-size:3em;font-weight:900;background:linear-gradient(135deg,#4ade80,#22d3ee,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.tagline{color:#888;font-size:1.1em}
+.badge{display:inline-block;margin-top:16px;padding:6px 20px;background:#1a1a2e;border:1px solid #22d3ee20;border-radius:24px;font-size:0.85em;color:#22d3ee}
+
+/* 章节 */
+.section{margin-bottom:48px}
+h2{font-size:1.5em;font-weight:700;color:#fff;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1a1a2e}
+p{color:#aaa;margin-bottom:12px;font-size:0.95em}
+
+/* 指标 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:32px 0}
+.stat{background:#111;border:1px solid #222;border-radius:12px;padding:24px;text-align:center}
+.stat-num{font-size:2em;font-weight:900;color:#4ade80}
+.stat-label{font-size:0.8em;color:#666;margin-top:4px}
+
+/* 工具列表 */
+.tools{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}
+.tool{background:#111;border:1px solid #222;border-radius:8px;padding:16px}
+.tool-name{color:#4ade80;font-weight:600;font-size:0.9em}
+.tool-desc{color:#666;font-size:0.8em;margin-top:4px}
+
+/* 链上信息 */
+.chain-info{background:#111;border:1px solid #222;border-radius:12px;padding:24px;margin:20px 0}
+.chain-info a{color:#22d3ee}
+.chain-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #0d0d1a;font-size:0.9em}
+.chain-row .label{color:#888}
+.chain-row .value{color:#4ade80;word-break:break-all}
+
+/* 按钮 */
+.btn{display:inline-block;padding:12px 28px;border-radius:10px;border:none;font-size:1em;font-weight:600;cursor:pointer;text-decoration:none;transition:all .3s}
+.btn-primary{background:linear-gradient(135deg,#4ade80,#22d3ee);color:#000}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,211,238,0.3)}
+.btn-secondary{background:#1a1a2e;color:#22d3ee;border:1px solid #22d3ee20;margin-left:12px}
+.btn-secondary:hover{background:#222}
+.buttons{text-align:center;margin:40px 0}
+
+/* 页脚 */
+.footer{text-align:center;padding:40px 0;color:#333;font-size:0.85em;border-top:1px solid #1a1a2e;margin-top:60px}
+.footer a{color:#555;text-decoration:none}
+
+@media(max-width:600px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .tools{grid-template-columns:1fr}
+    h1{font-size:2em}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+<span class="logo">🧬</span>
+<h1>IP Weave</h1>
+<div class="tagline">基于 GLM-5.1 的自治链上 IP 衍生内容 Agent</div>
+<div class="badge">Casual Hackathon · Z.AI 赛道</div>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="stat-num">8</div><div class="stat-label">工具模块</div></div>
+<div class="stat"><div class="stat-num">6</div><div class="stat-label">GLM-5.1 调用点</div></div>
+<div class="stat"><div class="stat-num">3</div><div class="stat-label">衍生内容类型</div></div>
+<div class="stat"><div class="stat-num">1</div><div class="stat-label">链上合约</div></div>
+</div>
+
+<div class="section">
+<h2>项目简介</h2>
+<p>IP Weave 是一个基于 GLM-5.1 的自治 AI Agent，专为链上 IP 衍生内容创作设计。它以 ReAct 架构为核心，启动时先由 GLM-5.1 自主拆解任务并制定多步骤计划，随后逐轮分析当前状态、调用合适的工具执行、评估结果并迭代修复。</p>
+<p>一人加一 Agent，替代传统需要整个创作团队才能完成的工作。给一个链上 IP，它还你一个世界。</p>
+</div>
+
+<div class="section">
+<h2>工作流程</h2>
+<p>1. 读取链上 IP 数据 — 从以太坊主网获取 IP 元数据</p>
+<p>2. 分析风格 — GLM-5.1 提取 IP 视觉和叙事特征</p>
+<p>3. 创作故事 — 生成 2000-4000 字完整叙事</p>
+<p>4. 生成脚本 — 转化为 6-8 个分镜的专业动画脚本</p>
+<p>5. 设计资产 — 周边资产概念和 3D 模型</p>
+<p>6. 检查质量 — 风格一致性评分，自动迭代修正</p>
+<p>7. 上链交付 — 生成 NFT 合约并部署到测试网</p>
+</div>
+
+<div class="section">
+<h2>工具模块</h2>
+<div class="tools">
+<div class="tool"><div class="tool-name">ip_reader</div><div class="tool-desc">读取链上 IP 数据</div></div>
+<div class="tool"><div class="tool-name">style_analyzer</div><div class="tool-desc">GLM-5.1 分析风格</div></div>
+<div class="tool"><div class="tool-name">story_writer</div><div class="tool-desc">GLM-5.1 创作故事</div></div>
+<div class="tool"><div class="tool-name">script_writer</div><div class="tool-desc">GLM-5.1 生成分镜</div></div>
+<div class="tool"><div class="tool-name">asset_designer</div><div class="tool-desc">设计周边资产概念</div></div>
+<div class="tool"><div class="tool-name">render_3d</div><div class="tool-desc">3D 模型生成</div></div>
+<div class="tool"><div class="tool-name">quality_checker</div><div class="tool-desc">风格一致性检查</div></div>
+<div class="tool"><div class="tool-name">deliver</div><div class="tool-desc">HTML+NFT合约交付</div></div>
+</div>
+</div>
+
+<div class="section">
+<h2>链上证明</h2>
+<div class="chain-info">
+<div class="chain-row"><span class="label">网络</span><span class="value">Sepolia Testnet</span></div>
+<div class="chain-row"><span class="label">合约地址</span><span class="value">0x428fc6c80773F44220E7bcb9c7b4833C62F0f343</span></div>
+<div class="chain-row"><span class="label">Etherscan</span><span class="value"><a href="https://sepolia.etherscan.io/address/0x428fc6c80773F44220E7bcb9c7b4833C62F0f343" target="_blank" style="color:#22d3ee">查看合约</a></span></div>
+<div class="chain-row"><span class="label">开发者</span><span class="value">Venz</span></div>
+</div>
+</div>
+
+<div class="buttons">
+<a class="btn btn-primary" href="https://github.com/yanwenzhe519-ctrl/IP-Weave" target="_blank">GitHub Repo</a>
+<a class="btn btn-secondary" href="docs/run_record_azuki.json">运行记录</a>
+</div>
+
+<div class="footer">
+<a href="https://github.com/yanwenzhe519-ctrl/IP-Weave">IP Weave</a> · 基于 GLM-5.1 · MIT License
+</div>
+
+</div>
+</body>
+</html>
