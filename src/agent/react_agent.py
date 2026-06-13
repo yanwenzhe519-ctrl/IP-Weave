@@ -17,6 +17,7 @@ class Agent:
             {"name": "write_script", "desc": "将故事转为动画分镜脚本"},
             {"name": "design_assets", "desc": "设计周边资产概念"},
             {"name": "generate_3d", "desc": "为周边资产生成3D模型,GLB格式,可上链"},
+            {"name": "render_3d", "desc": "用 build123d 为周边资产生成 3D 模型文件(.glb)"},
             {"name": "check_quality", "desc": "评估内容风格一致性"},
             {"name": "deliver", "desc": "生成交付物"},
         ]
@@ -45,7 +46,7 @@ class Agent:
         status += "style: " + ("OK" if self.state["style"] else "空") + "\n"
         status += "story: " + str(len(self.state.get("story",""))) + "字\n"
         status += "script: " + str(len(self.state.get("script",""))) + "字\n"
-        status += "assets: " + ("有" if self.state.get("assets",{}).get("assets") else "空") + "\n"
+        status += "assets: " + ("有" if self.state.get("assets",{}).get("assets") else "空") + "\n    models: " + str(len(os.listdir("output/models"))) + "个3D\n" if os.path.exists("output/models") else "\n"
         status += "3d_models: " + str(len(self.state.get("models",[]))) + "个\n"
         prompt = "你是IP Weave总指挥。目标: 给" + self.state["ip"] + "生成故事/脚本/资产/3D模型。\n\n状态:\n" + status
         prompt += "\n工具:\n" + "\n".join(["  " + t["name"] + ": " + t["desc"] for t in self.tools])
@@ -93,6 +94,17 @@ class Agent:
                         count += 1
                 logger.info(f"  3D: {count}个")
                 return count > 0
+            elif action == "render_3d":
+                from src.skills.render_3d import Render3D
+                assets = self.state.get("assets", {}).get("assets", [])
+                if assets:
+                    r3d = Render3D()
+                    for a in assets:
+                        name = a.get("name", "asset")
+                        desc = a.get("description", "")[:100]
+                        r3d.generate(name, desc)
+                return True
+
             elif action == "check_quality":
                 if not self.state.get("style"): return False
                 checker = StyleChecker(self.state["style"]); results = {}
