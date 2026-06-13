@@ -150,7 +150,7 @@ httpx 是 HTTP 客户端库，用于调用外部 API。
 set PYTHONPATH=%CD%
 
 第六步运行 Agent：
-echo pepe | python src/run_agent.py
+echo 链上IP | python src/run_agent.py
 
 Windows cmd 完整命令：
 cd IP-Weave
@@ -160,7 +160,7 @@ echo pepe | python src\run_agent.py
 Git Bash 完整命令：
 cd /c/Users/lenovo/Desktop/IP-Weave
 export PYTHONPATH=$(pwd)
-echo "pepe" | python src/run_agent.py
+echo "链上IP" | python src/run_agent.py
 
 支持的 IP：pepe、bayc、punk、azuki。也支持直接输入 ERC-721 合约地址。
 
