@@ -171,6 +171,14 @@ nft 子目录包含 NFT 元数据和 Solidity 合约代码。
 <img width="1202" height="871" alt="222" src="https://github.com/user-attachments/assets/9c5aea7b-7610-4896-90d0-37bada451c46" />
 <img width="1146" height="898" alt="444" src="https://github.com/user-attachments/assets/a3ec471a-4d86-4cda-854d-1e0179b474af" />
 
+
+
+## 长程任务运行记录
+
+Agent 每次执行后会自动生成运行记录，保存在 output/IP名称/run_record.json 中。
+
+记录内容包含任务信息、步骤拆解、工具调用时间线和交付结果。通过这些记录，评审可以完整追溯 Agent 的任务拆解过程、每一步的工具选择、执行顺序和最终交付成果。
+
 ## 链上部署与测试网证明
 
 
