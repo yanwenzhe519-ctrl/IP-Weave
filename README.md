@@ -139,7 +139,7 @@ httpx 是 HTTP 客户端库，用于调用外部 API。
 第一步克隆仓库：git clone https://github.com/yanwenzhe519-ctrl/IP-Weave.git
 
 
-## 第二步进入目录：cd IP-Weave
+第二步进入目录：cd IP-Weave
 
 
 第三步安装依赖：pip install -r requirements.txt 然后 pip install build123d
