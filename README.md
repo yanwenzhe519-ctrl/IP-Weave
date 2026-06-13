@@ -198,44 +198,29 @@ nft 子目录包含 NFT 元数据文件 metadata.json、Solidity 合约代码 IP
 
 ## 链上部署指南
 
-### 示例部署
+部署到 Sepolia 测试网（推荐）
 
-本项目在 Sepolia 测试网上部署了一个示例合约，供评委验证链上交付能力。
+Agent 默认部署到 Sepolia 测试网。部署时会自动生成临时钱包用于支付 Gas 费用。Sepolia ETH 可通过公开水龙头免费领取，无实际经济价值。
 
-网络: Sepolia Testnet，链 ID: 11155111
-RPC 地址: https://ethereum-sepolia-rpc.publicnode.com
-合约地址: 0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
-Etherscan: https://sepolia.etherscan.io/address/0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
+使用方法：确保运行 Agent 的钱包有足够 Sepolia ETH，Agent 会自动编译和部署 ERC-721 合约。部署完成后终端会打印合约地址和 Etherscan 链接。
 
-这个示例合约仅用于演示，使用的是测试网 ETH，没有任何实际经济价值。评审可以通过 Etherscan 查看合约代码和交易记录。
+部署到其他 EVM 链
 
-### 部署到其他 EVM 链
-
-项目支持任何 EVM 兼容链。部署时需要修改 src/agent/react_agent.py 中的 RPC 地址和链 ID。
+项目支持任何 EVM 兼容链。部署时修改 src/agent/react_agent.py 中的 RPC 地址和链 ID。
 
 常用测试网配置：
 Sepolia: RPC https://ethereum-sepolia-rpc.publicnode.com，链 ID 11155111
 Polygon Mumbai: RPC https://rpc-mumbai.maticvigil.com，链 ID 80001
 Arbitrum Sepolia: RPC https://sepolia-rollup.arbitrum.io/rpc，链 ID 421614
 
-### 钱包管理
+钱包管理
 
-Agent 自动生成临时钱包用于部署，私钥仅在内存中使用。也支持用户导入自己的测试网钱包。请始终使用测试网，不要使用主网私钥。
+Agent 自动生成临时部署钱包，私钥仅在内存中使用。用户也可在代码中设置自己的测试网钱包私钥。请始终使用测试网，不要使用主网私钥。## 链上测试网证据
 
----
+Agent 每次部署后会在终端打印合约地址，可在 Etherscan 上查看。
 
-## 链上测试网证据
+查看方式：运行 Agent 后在终端查看打印的合约地址。打开 https://sepolia.etherscan.io 输入合约地址查看合约代码和交易记录。output 目录的 nft 子目录中包含合约源码。
 
-合约地址: 0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
-Etherscan: https://sepolia.etherscan.io/address/0x428fc6c80773F44220E7bcb9c7b4833C62F0f343
-
-Agent 钱包地址: 0x3C215983f524271a4aB1A11E041cDC01ca84B9EC
-该钱包由 Agent 自动生成，仅用于 Sepolia 测试网部署。钱包中的 Sepolia ETH 通过公开水龙头获取。
-
-铸造交易记录可以在 Etherscan 上查看。
-
----
-
-## 安全与合规
+部署钱包由 Agent 自动生成，Sepolia ETH 通过公开水龙头获取，无实际经济价值。## 安全与合规
 
 API Key 仅存于本地 .env 文件，已加入 .gitignore 不会被上传。合约部署仅使用测试网，不涉及主网和真实资产。所有 API 调用使用 HTTPS 加密传输。失败时有超时重试机制。Agent 循环上限 20 轮，超时自动终止交付。
