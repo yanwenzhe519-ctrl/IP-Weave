@@ -222,6 +222,14 @@ Etherscan: https://sepolia.etherscan.io/address/0x428fc6c80773F44220E7bcb9c7b483
 |------|------|----------|
 | 独立开发者 | Venz | 0xd4bcc91f1e632fdbc4a431a5c33e78b22e940ff1 |
 
+
+
+## 团队信息
+
+| 角色 | 成员 | 钱包地址 |
+|------|------|----------|
+| 独立开发者 | Venz | 0xd4bcc91f1e632fdbc4a431a5c33e78b22e940ff1 |
+
 ## 安全与合规
 
 
