@@ -166,6 +166,9 @@ nft 子目录包含 NFT 元数据和 Solidity 合约代码。
 
 ---
 
+<img width="1165" height="851" alt="111" src="https://github.com/user-attachments/assets/d9d2d2cd-1b55-47f9-a0b9-bf21ed4b0963" />
+<img width="1256" height="891" alt="1" src="https://github.com/user-attachments/assets/37d02f6d-3529-4299-bbdb-737b3a892cce" />
+<img width="1202" height="871" alt="222" src="https://github.com/user-attachments/assets/9c5aea7b-7610-4896-90d0-37bada451c46" />
 
 ## 链上部署与测试网证明
 
