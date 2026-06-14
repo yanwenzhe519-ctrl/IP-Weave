@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP Weave Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:sans-serif}
+.slide{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;opacity:0;transition:opacity 0.8s;pointer-events:none}
+.slide.active{opacity:1}
+h1{font-size:3.5em;font-weight:900;background:linear-gradient(135deg,#4ade80,#22d3ee,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+h2{font-size:2em;color:#fff;margin-bottom:12px}
+p{font-size:1.1em;color:#aaa;text-align:center;max-width:600px;line-height:1.8;margin-bottom:8px}
+.step{display:flex;align-items:center;gap:12px;margin:6px 0}
+.num{background:#4ade80;color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85em}
+.txt{font-size:1em;color:#ccc}
+.tool-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+.tool-item{background:#111;border:1px solid #222;border-radius:6px;padding:10px 14px;font-size:0.85em;color:#4ade80}
+.badge{padding:4px 14px;background:#4ade8020;border:1px solid #4ade8040;border-radius:20px;color:#4ade80;font-size:0.85em;margin:4px}
+.info-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1a1a2e;font-size:0.9em;width:400px}
+.lbl{color:#888}.val{color:#4ade80}
+.footer{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);color:#333;font-size:0.8em}
+.bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#4ade80,#22d3ee);transition:width 0.3s;z-index:100}
+</style></head>
+<body>
+<div class="bar" id="bar" style="width:0%"></div>
+
+<div class="slide active">
+<h1>IP Weave</h1>
+<p style="font-size:1.3em;color:#22d3ee">链上衍生宇宙</p>
+<p>基于 GLM-5.1 的自治链上 IP 衍生内容 Agent</p>
+<p style="font-size:0.9em;color:#666;margin-top:20px">一人 + 一 Agent = 一整个创作团队</p>
+<p style="font-size:0.85em;color:#555">Casual Hackathon · Z.AI · Venz</p>
+</div>
+
+<div class="slide">
+<h2>行业背景</h2>
+<p>链上 IP 发行即终点，90% 项目缺乏内容运营</p>
+<p style="font-size:0.95em;color:#666">传统需要 5-10 人团队 2-4 周</p>
+<p style="font-size:0.95em;color:#666">成本 5-20 万元，门槛极高</p>
+<p style="font-size:0.95em;color:#666">风格不统一，变现无渠道</p>
+</div>
+
+<div class="slide">
+<h2>解决方案</h2>
+<p style="font-size:1.1em;color:#fff">AI Agent 替代整个创作团队</p>
+<p>输入 IP 名称 → Agent 自动完成全部流程</p>
+<div class="step"><span class="num">1</span><span class="txt">读取链上数据</span></div>
+<div class="step"><span class="num">2</span><span class="txt">GLM-5.1 分析风格</span></div>
+<div class="step"><span class="num">3</span><span class="txt">GLM-5.1 创作故事</span></div>
+<div class="step"><span class="num">4</span><span class="txt">生成动画分镜脚本</span></div>
+<div class="step"><span class="num">5</span><span class="txt">设计周边资产</span></div>
+<div class="step"><span class="num">6</span><span class="txt">3D 模型生成</span></div>
+<div class="step"><span class="num">7</span><span class="txt">质量检查</span></div>
+<div class="step"><span class="num">8</span><span class="txt">上链部署 + 交付</span></div>
+</div>
+
+<div class="slide">
+<h2>八个工具模块</h2>
+<div class="tool-grid">
+<div class="tool-item">ip_reader - 读链上数据</div>
+<div class="tool-item">style_analyzer - 分析风格</div>
+<div class="tool-item">story_writer - 创作故事</div>
+<div class="tool-item">script_writer - 生成脚本</div>
+<div class="tool-item">asset_designer - 设计资产</div>
+<div class="tool-item">render_3d - 3D 建模</div>
+<div class="tool-item">quality_checker - 检查质量</div>
+<div class="tool-item">deploy_chain - 部署上链</div>
+</div>
+<p style="font-size:0.9em;color:#666;margin-top:12px">GLM-5.1 七个调用点，驱动全部流程</p>
+</div>
+
+<div class="slide">
+<h2>交付成果</h2>
+<p style="font-size:1.1em;color:#4ade80" id="result">📖 衍生故事 - 3000+ 字完整叙事</p>
+<p style="font-size:1.1em;color:#4ade80" id="result1" style="display:none">🎬 动画分镜 - 6-8 个专业分镜</p>
+<p style="font-size:1.1em;color:#4ade80" id="result2" style="display:none">🧸 周边资产 - 2 款可上链设计</p>
+<p style="font-size:1.1em;color:#4ade80" id="result3" style="display:none">🎨 3D 模型 - 浏览器可交互查看</p>
+<p style="font-size:1.1em;color:#4ade80" id="result4" style="display:none">📋 链上证明 - Sepolia 测试网合约</p>
+</div>
+
+<div class="slide">
+<h2>链上证明</h2>
+<div class="info-row"><span class="lbl">网络</span><span class="val">Sepolia Testnet</span></div>
+<div class="info-row"><span class="lbl">合约</span><span class="val">0x428fc6c80773F44220E7bcb9c7b4833C62F0f343</span></div>
+<div class="info-row"><span class="lbl">钱包</span><span class="val">0x3C215983f524271a4aB1A11E041cDC01ca84B9EC</span></div>
+<div class="info-row"><span class="lbl">Etherscan</span><span class="val"><a href="https://sepolia.etherscan.io/address/0x428fc6c80773F44220E7bcb9c7b4833C62F0f343" target="_blank" style="color:#22d3ee">查看合约</a></span></div>
+<p style="font-size:0.85em;color:#666;margin-top:16px">所有代码开源 · MIT 许可</p>
+</div>
+
+<div class="slide">
+<h2>一人 + 一 Agent</h2>
+<p>给一个链上 IP，它还你一个世界</p>
+<p style="font-size:0.9em;color:#888;margin-top:20px">GitHub: https://github.com/yanwenzhe519-ctrl/IP-Weave</p>
+<p style="font-size:0.9em;color:#888">Casual Hackathon · Z.AI · Venz</p>
+</div>
+
+<div class="footer" id="counter">第 1/7 页</div>
+
+<script>
+let i = 0;
+const slides = document.querySelectorAll('.slide');
+const bar = document.getElementById('bar');
+const counter = document.getElementById('counter');
+
+function show(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[n].classList.add('active');
+    bar.style.width = ((n + 1) / slides.length * 100) + '%';
+    counter.textContent = '第 ' + (n+1) + '/' + slides.length + ' 页';
+}
+
+document.addEventListener('click', () => {
+    i = (i + 1) % slides.length;
+    show(i);
+});
+
+// 自动翻页
+setInterval(() => {
+    i = (i + 1) % slides.length;
+    show(i);
+}, 4000);
+</script>
+</body>
+</html>
