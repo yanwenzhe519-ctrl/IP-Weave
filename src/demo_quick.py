@@ -3,8 +3,8 @@
 import os, sys, json, time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-DESKTOP = os.path.join(os.path.expanduser("~"), "Desktop")
-OUT = os.path.join(DESKTOP, "IP-Weave成果")
+DEMO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(DEMO_DIR, "docs", "demo_output")
 os.makedirs(OUT, exist_ok=True)
 
 # 读取 .env
