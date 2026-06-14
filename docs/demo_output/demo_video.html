@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP Weave Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:sans-serif;overflow:hidden}
+.slide{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;opacity:0;transition:opacity 1s;pointer-events:none}
+.slide.active{opacity:1;pointer-events:auto}
+h1{font-size:3em;font-weight:900;background:linear-gradient(135deg,#4ade80,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+h2{font-size:1.8em;color:#fff;margin-bottom:12px}
+p{font-size:1.1em;color:#aaa;text-align:center;max-width:600px;line-height:1.8}
+.code{background:#111;border:1px solid #333;border-radius:8px;padding:16px 24px;font-family:monospace;color:#4ade80;font-size:1em;margin:12px 0}
+.step{display:flex;align-items:center;gap:16px;margin:8px 0}
+.num{background:#4ade80;color:#000;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9em}
+.txt{font-size:1em;color:#ccc}
+.badge{display:inline-block;padding:4px 16px;background:#4ade8020;border:1px solid #4ade8040;border-radius:20px;color:#4ade80;font-size:0.9em;margin:4px}
+.footer{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);color:#333;font-size:0.85em}
+</style>
+</head>
+<body>
+
+<div class="slide active">
+<h1>IP Weave</h1>
+<p style="font-size:1.3em;color:#22d3ee">链上衍生宇宙</p>
+<p>基于 GLM-5.1 的自治链上 IP 衍生内容 Agent</p>
+<br>
+<p style="font-size:0.9em;color:#666">给一个链上 IP，它还你一个世界</p>
+<p style="font-size:0.9em;color:#666">一人 + 一 Agent = 一创作团队</p>
+<br>
+<p style="font-size:0.8em;color:#555">Casual Hackathon · Z.AI 赛道 · Venz</p>
+</div>
+
+<div class="slide">
+<h2>8 步自主决策</h2>
+<div class="step"><span class="num">1</span><span class="txt">读取链上 IP 数据</span></div>
+<div class="step"><span class="num">2</span><span class="txt">GLM-5.1 分析风格</span></div>
+<div class="step"><span class="num">3</span><span class="txt">GLM-5.1 创作故事</span></div>
+<div class="step"><span class="num">4</span><span class="txt">生成动画分镜脚本</span></div>
+<div class="step"><span class="num">5</span><span class="txt">设计周边资产</span></div>
+<div class="step"><span class="num">6</span><span class="txt">3D 模型生成</span></div>
+<div class="step"><span class="num">7</span><span class="txt">质量检查</span></div>
+<div class="step"><span class="num">8</span><span class="txt">上链部署 + 交付</span></div>
+</div>
+
+<div class="slide">
+<p style="font-size:2em;color:#4ade80">📖</p>
+<h2>衍生故事</h2>
+<p>GLM-5.1 基于 Azuki IP 创作的完整衍生故事</p>
+<p style="font-size:0.9em;color:#666">3000+ 字 · 完整叙事弧线 · 日式街头风格</p>
+<br>
+<a href="story.html" target="_blank" style="padding:12px 28px;background:linear-gradient(135deg,#4ade80,#22d3ee);color:#000;border-radius:8px;text-decoration:none;font-weight:600">查看故事</a>
+</div>
+
+<div class="slide">
+<p style="font-size:2em;color:#4ade80">🎬</p>
+<h2>动画分镜脚本</h2>
+<p>专业分镜脚本，可直接用于动画制作</p>
+<p style="font-size:0.9em;color:#666">6-8 个分镜 · 画面描述 · 镜头运动 · 对白 · 时长</p>
+<br>
+<a href="script.html" target="_blank" style="padding:12px 28px;background:linear-gradient(135deg,#4ade80,#22d3ee);color:#000;border-radius:8px;text-decoration:none;font-weight:600">查看脚本</a>
+</div>
+
+<div class="slide">
+<p style="font-size:2em;color:#4ade80">🧸</p>
+<h2>周边资产</h2>
+<p>可上链的资产概念设计</p>
+<p style="font-size:0.9em;color:#666">2 款设计 · NFT 元数据</p>
+<br>
+<a href="assets.html" target="_blank" style="padding:12px 28px;background:linear-gradient(135deg,#4ade80,#22d3ee);color:#000;border-radius:8px;text-decoration:none;font-weight:600">查看资产</a>
+</div>
+
+<div class="slide">
+<p style="font-size:2em;color:#4ade80">📋</p>
+<h2>链上证明</h2>
+<p>合约已部署到 Sepolia 测试网</p>
+<p style="font-size:0.9em;color:#666">合约地址 · 执行记录 · 质量评分 ·钱包信息</p>
+<br>
+<a href="proof.html" target="_blank" style="padding:12px 28px;background:linear-gradient(135deg,#4ade80,#22d3ee);color:#000;border-radius:8px;text-decoration:none;font-weight:600">查看证明</a>
+</div>
+
+<div class="slide">
+<h2>一人 + 一 Agent = 一创作团队</h2>
+<p>给一个链上 IP，它还你一个世界</p>
+<br>
+<p style="font-size:0.9em;color:#888">GitHub: https://github.com/yanwenzhe519-ctrl/IP-Weave</p>
+<p style="font-size:0.9em;color:#888">展示页: https://yanwenzhe519-ctrl.github.io/IP-Weave/</p>
+<br>
+<p style="color:#555">Casual Hackathon · Z.AI 赛道 · Venz</p>
+</div>
+
+<div class="footer">IP Weave · GLM-5.1 · 点击切换</div>
+
+<script>
+let i = 0;
+const slides = document.querySelectorAll('.slide');
+document.addEventListener('click', () => {
+    slides[i].classList.remove('active');
+    i = (i + 1) % slides.length;
+    slides[i].classList.add('active');
+});
+</script>
+</body>
+</html>
